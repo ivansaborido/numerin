@@ -1,0 +1,1354 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3A37B5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Numerín</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: una hoja de cuaderno de cuadrícula; cabecera con estrellas y racha, pestañas, y una sola tarjeta de trabajo centrada (máx. 860px) */
+:root{
+  --paper:#F4F7FB; --grid:#DFE7F1; --card:#FFFFFF; --ink:#1C2740; --muted:#56657F; --line:#D3DCE8;
+  --accent:#3A37B5; --accent-soft:#E6E5FA; --on-accent:#FFFFFF;
+  --star:#D99A00; --star-soft:#FFF1C7;
+  --ok:#157F55; --ok-soft:#DCF3E8; --ko:#BF3838; --ko-soft:#FAE1E1;
+  --u:#2B78DB; --d:#1A944A; --c:#DB740A; --um:#8649DC; --dec:#BD3D7A;
+  --u-soft:#DDEBFC; --d-soft:#DAF2E3; --c-soft:#FDE9D3; --um-soft:#EDE3FB;
+  --f-display:"Lexend", "Trebuchet MS", system-ui, sans-serif;
+  --f-body:"Lexend", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-num:"Atkinson Hyperlegible", Verdana, system-ui, sans-serif;
+  --r:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111726; --grid:#1B2336; --card:#182033; --ink:#E7EDF7; --muted:#9AA8BF; --line:#2A3550;
+    --accent:#8F8CF4; --accent-soft:#26284A; --on-accent:#101425;
+    --star:#FFC838; --star-soft:#3A3113;
+    --ok:#46C98F; --ok-soft:#133226; --ko:#FF7B7B; --ko-soft:#3B1B1E;
+    --u:#5EA2F5; --d:#45C477; --c:#F59A3C; --um:#AE86F2; --dec:#EB6FA8;
+    --u-soft:#172B45; --d-soft:#15311F; --c-soft:#3A2710; --um-soft:#2A1F42;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111726; --grid:#1B2336; --card:#182033; --ink:#E7EDF7; --muted:#9AA8BF; --line:#2A3550;
+  --accent:#8F8CF4; --accent-soft:#26284A; --on-accent:#101425;
+  --star:#FFC838; --star-soft:#3A3113;
+  --ok:#46C98F; --ok-soft:#133226; --ko:#FF7B7B; --ko-soft:#3B1B1E;
+  --u:#5EA2F5; --d:#45C477; --c:#F59A3C; --um:#AE86F2; --dec:#EB6FA8;
+  --u-soft:#172B45; --d-soft:#15311F; --c-soft:#3A2710; --um-soft:#2A1F42;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+  color:var(--ink); font-family:var(--f-body); font-size:17px; line-height:1.5;
+  padding-inline:16px; padding-block:0 48px;
+}
+.wrap{max-width:860px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+h2{font-size:1.5rem;font-weight:700}
+h3{font-size:1.15rem;font-weight:600}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,label.btn:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+
+/* Cabecera */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);padding-block:12px 8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:1.45rem;letter-spacing:-.01em;margin-right:auto}
+.logo{display:grid;grid-template-columns:repeat(2,13px);gap:3px}
+.logo i{width:13px;height:13px;border-radius:3px;display:block}
+.logo i:nth-child(1){background:var(--um)} .logo i:nth-child(2){background:var(--c)} .logo i:nth-child(3){background:var(--d)} .logo i:nth-child(4){background:var(--u)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 12px;font-weight:600;font-size:.95rem;background:var(--card);border:1px solid var(--line)}
+.pill.star{background:var(--star-soft);border-color:transparent;color:var(--ink)}
+.pill.star svg{color:var(--star)}
+.pill.who{cursor:pointer}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-block:4px 12px;scrollbar-width:none}
+.tabs button{flex:0 0 auto;border:0;background:transparent;padding:10px 16px;border-radius:12px;font-weight:600;color:var(--muted)}
+.tabs button[aria-current="page"]{background:var(--accent);color:var(--on-accent)}
+.tabs button:not([aria-current="page"]):hover{background:var(--accent-soft);color:var(--ink)}
+
+/* Tarjetas y botones */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.small{font-size:.9rem}
+.eyebrow{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:10px 20px;border-radius:14px;border:2px solid transparent;font-weight:600;font-size:1.02rem;text-align:center}
+.btn.primary{background:var(--accent);color:var(--on-accent)}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn.ghost:hover{border-color:var(--accent)}
+.btn.big{min-height:64px;font-size:1.12rem;padding-inline:24px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.speak{border:0;background:var(--accent-soft);color:var(--accent);border-radius:999px;width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+
+/* Inicio */
+.hello{display:flex;flex-direction:column;gap:6px;padding-block:6px 4px}
+.hello h1{font-size:clamp(1.7rem,4vw,2.3rem);font-weight:800}
+.actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.action{border:1px solid var(--line);background:var(--card);border-radius:var(--r);padding:20px;text-align:left;display:flex;flex-direction:column;gap:8px;min-height:150px}
+.action:hover{border-color:var(--accent)}
+.action .ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--accent-soft);color:var(--accent)}
+.action.hero{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.action.hero .ico{background:rgba(255,255,255,.18);color:var(--on-accent)}
+.action.hero .muted{color:var(--on-accent);opacity:.85}
+.action b{font-family:var(--f-display);font-size:1.15rem}
+.legend{display:flex;flex-wrap:wrap;gap:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:.9rem;font-weight:600;padding:4px 10px;border-radius:999px}
+.legend i{width:12px;height:12px;border-radius:3px;display:block}
+.k-um{background:var(--um-soft)} .k-um i{background:var(--um)}
+.k-c{background:var(--c-soft)} .k-c i{background:var(--c)}
+.k-d{background:var(--d-soft)} .k-d i{background:var(--d)}
+.k-u{background:var(--u-soft)} .k-u i{background:var(--u)}
+.progress{height:14px;border-radius:999px;background:var(--grid);overflow:hidden}
+.progress > i{display:block;height:100%;background:var(--star);border-radius:999px;transition:width .5s}
+
+/* Visuales */
+.vis{background:var(--paper);border-radius:12px;padding:14px;overflow-x:auto;border:1px dashed var(--line)}
+.bloques{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end}
+.bgroup{display:flex;flex-direction:column;gap:8px;align-items:flex-start;min-width:0}
+.bpieces{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-end;max-width:320px}
+.bgroup .lab{font-size:.9rem;font-weight:600}
+.pz-um{width:54px;height:54px;border-radius:6px;background:var(--um);box-shadow:inset -8px -8px 0 rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.7rem;font-weight:700}
+.pz-c{width:54px;height:54px;border-radius:3px;background-color:var(--c);background-image:linear-gradient(rgba(255,255,255,.35) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.35) 1px,transparent 1px);background-size:5.4px 5.4px}
+.pz-d{width:8px;height:54px;border-radius:2px;background-color:var(--d);background-image:linear-gradient(rgba(255,255,255,.4) 1px,transparent 1px);background-size:8px 5.4px}
+.pz-u{width:9px;height:9px;border-radius:2px;background:var(--u)}
+.pz-zero{width:54px;height:54px;border:2px dashed var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700}
+.bignum{font-family:var(--f-num);font-size:2rem;font-weight:700;letter-spacing:.04em}
+.cu{color:var(--u)} .cd{color:var(--d)} .cc{color:var(--c)} .cum{color:var(--um)} .cdec{color:var(--dec)}
+table.pos{border-collapse:separate;border-spacing:6px;font-family:var(--f-num)}
+table.pos th{font-size:.85rem;padding:6px 10px;border-radius:8px;color:#fff}
+table.pos td{font-size:1.8rem;font-weight:700;text-align:center;padding:4px 10px;border-radius:8px;background:var(--card)}
+.th-u{background:var(--u)} .th-d{background:var(--d)} .th-c{background:var(--c)} .th-um{background:var(--um)}
+.op{display:inline-grid;gap:2px 4px;font-family:var(--f-num);font-size:2rem;font-weight:700}
+.op .cell{width:2.1rem;height:2.6rem;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.op .cell.col-u{background:var(--u-soft)} .op .cell.col-d{background:var(--d-soft)} .op .cell.col-c{background:var(--c-soft)} .op .cell.col-um{background:var(--um-soft)} .op .cell.col-dec{background:var(--accent-soft)}
+.op .rule{border-top:3px solid var(--ink);height:0}
+.op .q{color:var(--muted)}
+.frac-row{display:flex;flex-direction:column;gap:14px}
+.frac-item{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fbars{display:flex;flex-direction:column;gap:6px;flex:1 1 220px;min-width:0}
+.fbar{display:flex;height:44px;border:2px solid var(--ink);border-radius:8px;overflow:hidden}
+.fbar i{flex:1;border-right:2px solid var(--ink);background:var(--card)}
+.fbar i:last-child{border-right:0}
+.fbar i.on{background:var(--c)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-family:var(--f-num);font-weight:700;line-height:1.05;vertical-align:middle}
+.frac span:first-child{border-bottom:2px solid currentColor;padding:0 4px}
+.frac.big{font-size:1.7rem}
+.groups{display:flex;flex-wrap:wrap;gap:10px}
+.grp{border:2px solid var(--d);border-radius:18px;padding:8px;display:grid;grid-template-columns:repeat(4,14px);gap:5px;background:var(--card)}
+.grp i{width:14px;height:14px;border-radius:50%;background:var(--u);display:block}
+svg.recta text{fill:var(--ink);font-family:var(--f-num);font-size:15px}
+svg.recta .axis{stroke:var(--ink);stroke-width:2.5}
+svg.recta .tick{stroke:var(--ink);stroke-width:2}
+svg.recta .jump{stroke:var(--c);stroke-width:3;fill:none}
+svg.recta .jumpl{fill:var(--c);font-weight:700}
+svg.recta .pt{fill:var(--u)}
+svg.recta .ah{fill:var(--c)}
+
+/* Preguntas */
+.qhead{display:flex;align-items:flex-start;gap:12px}
+.qtext{font-size:1.3rem;font-weight:600;flex:1;min-width:0}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.opt{min-height:72px;border-radius:16px;border:2px solid var(--line);background:var(--card);font-family:var(--f-num);font-size:1.5rem;font-weight:700;padding:10px;display:flex;align-items:center;justify-content:center;text-align:center}
+.opt.txt{font-family:var(--f-body);font-size:1.05rem;font-weight:600}
+.opt:hover:not([disabled]){border-color:var(--accent);background:var(--accent-soft)}
+.opt.good{border-color:var(--ok);background:var(--ok-soft)}
+.opt.bad{border-color:var(--ko);background:var(--ko-soft)}
+.opt[disabled]{cursor:default}
+.feedback{border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.feedback.ok{background:var(--ok-soft)}
+.feedback.ko{background:var(--ko-soft)}
+.feedback b{font-family:var(--f-display);font-size:1.15rem}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.steps i{width:28px;height:8px;border-radius:999px;background:var(--line);display:block}
+.steps i.done{background:var(--ok)} .steps i.now{background:var(--accent)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:.85rem}
+.chip.rep{background:var(--star-soft);color:var(--ink)}
+
+/* Foto */
+.drop{border:2px dashed var(--accent);border-radius:var(--r);padding:26px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;background:var(--accent-soft)}
+.drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.preview{max-height:320px;width:auto;max-width:100%;border-radius:12px;border:1px solid var(--line);align-self:center}
+textarea{width:100%;min-height:90px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;padding:12px;resize:vertical}
+input[type=text],select{min-height:52px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;padding:0 14px;width:100%}
+label.f{display:flex;flex-direction:column;gap:6px;font-weight:600}
+.thinking{display:flex;align-items:center;gap:14px}
+.dots{display:flex;gap:6px}
+.dots i{width:14px;height:14px;border-radius:4px;display:block;animation:bob 1.2s infinite ease-in-out}
+.dots i:nth-child(1){background:var(--um)} .dots i:nth-child(2){background:var(--c);animation-delay:.15s} .dots i:nth-child(3){background:var(--d);animation-delay:.3s} .dots i:nth-child(4){background:var(--u);animation-delay:.45s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.notice{border-radius:12px;padding:14px;background:var(--star-soft);font-size:.95rem}
+.enun{font-family:var(--f-num);font-size:1.2rem;background:var(--paper);padding:12px 14px;border-radius:12px;border-left:5px solid var(--accent)}
+
+/* Premios */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:2px}
+.tile .v{font-family:var(--f-num);font-size:1.9rem;font-weight:700}
+.stickers{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px}
+.sticker{aspect-ratio:1;max-width:100%;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:var(--star-soft);border:2px solid var(--star)}
+.sticker.lock{background:var(--grid);border:2px dashed var(--line);color:var(--muted);font-size:1.2rem;font-weight:700}
+.badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.badge{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--card)}
+.medal{width:46px;height:46px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:var(--star);color:#3a2a00}
+.badge.lock .medal{background:var(--grid);color:var(--muted)}
+.badge.lock{opacity:.75}
+
+/* Progreso */
+.trow{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;gap:12px;align-items:center;padding-block:8px;border-bottom:1px solid var(--line)}
+.trow:last-child{border-bottom:0}
+.mbar{height:12px;border-radius:999px;background:var(--grid);overflow:hidden}
+.mbar i{display:block;height:100%}
+.hist{display:flex;flex-direction:column}
+.hitem{display:flex;gap:12px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line)}
+.hitem:last-child{border-bottom:0}
+.hitem .t{flex:1;min-width:0}
+.hitem .t p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.score{font-family:var(--f-num);font-weight:700;padding:4px 10px;border-radius:999px;font-size:.9rem}
+.score.hi{background:var(--ok-soft);color:var(--ok)} .score.mid{background:var(--star-soft);color:var(--ink)} .score.lo{background:var(--ko-soft);color:var(--ko)}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:600;padding:6px 4px}
+
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:12px;font-weight:600;max-width:calc(100% - 32px);z-index:20}
+.pop{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){ .dots i,.pop{animation:none} .progress>i{transition:none} }
+@media (max-width:520px){
+  body{font-size:16px}
+  .qtext{font-size:1.15rem}
+  .trow{grid-template-columns:minmax(0,1fr) 70px auto}
+  .brand{font-size:1.25rem}
+}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;padding-top:env(safe-area-inset-top,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+svg.reloj .cara{fill:var(--card);stroke:var(--ink);stroke-width:4}
+svg.reloj .tk{stroke:var(--muted);stroke-width:1.5}
+svg.reloj .tk5{stroke:var(--ink);stroke-width:3}
+svg.reloj text{fill:var(--ink);font-family:var(--f-num);font-weight:700;font-size:17px}
+svg.reloj .hh{stroke:var(--c);stroke-width:8;stroke-linecap:round}
+svg.reloj .mm{stroke:var(--u);stroke-width:5;stroke-linecap:round}
+svg.reloj .eje{fill:var(--ink)}
+.reloj-wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.reloj-wrap svg{width:220px;max-width:100%;height:auto;flex:0 0 auto}
+.reloj-leg{display:flex;flex-direction:column;gap:6px;font-size:.95rem;min-width:0}
+.reloj-leg span{display:flex;align-items:center;gap:8px}
+.reloj-leg i{width:28px;height:6px;border-radius:3px;display:block}
+.digital{font-family:var(--f-num);font-size:1.8rem;font-weight:700;background:var(--ink);color:var(--paper);border-radius:10px;padding:2px 14px;align-self:flex-start}
+.esc{display:flex;align-items:flex-end;gap:0;overflow-x:auto;padding-bottom:4px}
+.esc .st{display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto}
+.esc .box{min-width:46px;padding:10px 6px;border-radius:8px;border:2px solid var(--line);background:var(--card);font-family:var(--f-num);font-weight:700;text-align:center}
+.esc .box.from{border-color:var(--accent);background:var(--accent-soft)}
+.esc .box.to{border-color:var(--star);background:var(--star-soft)}
+.esc .arr{font-size:.75rem;color:var(--muted);padding:0 3px;align-self:center;font-family:var(--f-num)}
+.esc .arr.on{color:var(--c);font-weight:700}
+input[type=password]{min-height:52px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;padding:0 14px;width:100%}
+a{color:var(--accent)}
+.tipbox{background:var(--star-soft);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.avatar{width:30px;height:30px;border-radius:50%;overflow:hidden;background:var(--accent);color:var(--on-accent);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex:0 0 auto}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar.mid{width:72px;height:72px;font-size:1.8rem;border:3px solid var(--star)}
+.avatar.big{width:120px;height:120px;font-size:3rem;border:4px solid var(--star)}
+.pill.who{padding-left:4px}
+.hello-row{display:flex;align-items:center;gap:16px}
+.hello-row .hello{flex:1;min-width:0}
+.avatar-row{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.hidden-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Numerín</div>
+    <button class="pill who" id="whoBtn" type="button" hidden></button>
+    <span class="pill star" id="starPill" hidden></span>
+    <span class="pill" id="streakPill" hidden></span>
+    <button type="button" class="pill" id="installBtn" hidden>Instalar app</button>
+  </header>
+  <nav class="tabs" id="tabs" hidden aria-label="Secciones">
+    <button type="button" data-view="inicio" aria-current="page">Inicio</button>
+    <button type="button" data-view="foto">Foto del ejercicio</button>
+    <button type="button" data-view="examen">Exámenes</button>
+    <button type="button" data-view="premios">Premios</button>
+    <button type="button" data-view="progreso">Progreso</button>
+  </nav>
+
+  <main>
+    <section id="v-carga" class="card">
+      <div class="thinking"><div class="dots"><i></i><i></i><i></i><i></i></div><p>Abriendo tu cuaderno…</p></div>
+    </section>
+    <section id="v-perfil" hidden></section>
+    <section id="v-inicio" class="stack" hidden></section>
+    <section id="v-foto" class="stack" hidden></section>
+    <section id="v-examen" class="stack" hidden></section>
+    <section id="v-premios" class="stack" hidden></section>
+    <section id="v-progreso" class="stack" hidden></section>
+  </main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ================= Utilidades ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const R = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a; };
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+function fmt(n){
+  if (typeof n !== 'number' || !Number.isFinite(n)) return String(n);
+  let s = Math.abs(n).toFixed(3).replace(/\.?0+$/,'');
+  let [i,d] = s.split('.');
+  if (i.length >= 5) i = i.replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+  return (n < 0 ? '−' : '') + i + (d ? ',' + d : '');
+}
+function horaTexto(h,m){
+  h=((h-1)%12+12)%12+1; const nom=x=>x===1?'La una':`Las ${x}`, sig=h%12+1;
+  if(m===0) return `${nom(h)} en punto`; if(m===15) return `${nom(h)} y cuarto`; if(m===30) return `${nom(h)} y media`;
+  if(m===45) return `${nom(sig)} menos cuarto`; return m<30 ? `${nom(h)} y ${m}` : `${nom(sig)} menos ${60-m}`;
+}
+const hoy = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const ayer = () => { const d=new Date(); d.setDate(d.getDate()-1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>t.hidden=true,3200); }
+const canSpeak = 'speechSynthesis' in window;
+const DEN = {2:['medio','medios'],3:['tercio','tercios'],4:['cuarto','cuartos'],5:['quinto','quintos'],6:['sexto','sextos'],7:['séptimo','séptimos'],8:['octavo','octavos'],9:['noveno','novenos'],10:['décimo','décimos']};
+function paraVoz(t){
+  return String(t)
+    .replace(/(\d+)\s*\/\s*(\d+)/g,(m,a,b)=>{ const n=+a, d=+b, w=DEN[d]; return `${n} ${w ? w[n===1?0:1] : (n===1?d+'avo':d+'avos')}`; })
+    .replace(/\u202F/g,'').replace(/−/g,' menos ').replace(/×/g,' por ').replace(/\s:\s/g,' entre ')
+    .replace(/°C/g,' grados').replace(/→/g,', ').replace(/%/g,' por ciento').replace(/\bml\b/g,'mililitros').replace(/\bkg\b/g,'kilos').replace(/\bkm\b/g,'kilómetros').replace(/\bcm\b/g,'centímetros').replace(/\bmm\b/g,'milímetros');
+}
+let VOZ=null;
+function vozES(){ try{ const vs=speechSynthesis.getVoices(); return vs.find(v=>v.lang==='es-ES')||vs.find(v=>/^es/i.test(v.lang))||null; }catch(e){ return null; } }
+if (canSpeak) try{ speechSynthesis.onvoiceschanged=()=>{ VOZ=vozES(); }; VOZ=vozES(); }catch(e){}
+function hablar(txt){ try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(paraVoz(txt)); u.lang='es-ES'; if(VOZ) u.voice=VOZ; u.rate=.85; speechSynthesis.speak(u);}catch(e){} }
+const ICON = {
+  star:'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>',
+  fire:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22c4 0 7-3 7-7 0-4-3-6-4-9-2 2-2 4-3 5-1-2-2-3-2-6-3 3-5 6-5 10 0 4 3 7 7 7z"/></svg>',
+  cam:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  test:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
+  mix:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h4l8 10h4M4 17h4l2-2.5M14 9.5L16 7h4"/></svg>',
+  speak:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 010 6"/></svg>',
+  medal:'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 7.5l1.6 3.3 3.6.5-2.6 2.5.6 3.6L12 15.7l-3.2 1.7.6-3.6-2.6-2.5 3.6-.5z"/></svg>'
+};
+const speakBtn = txt => canSpeak ? `<button type="button" class="speak" data-say="${esc(txt)}" aria-label="Leer en voz alta">${ICON.speak}</button>` : '';
+document.addEventListener('click', e => { const b=e.target.closest('[data-say]'); if(b) hablar(b.dataset.say); });
+
+/* ================= Curso y temas ================= */
+const CURSOS = [
+  {id:'3p', nombre:'3º de Primaria'}, {id:'4p', nombre:'4º de Primaria'}, {id:'5p', nombre:'5º de Primaria'},
+  {id:'6p', nombre:'6º de Primaria'}, {id:'1e', nombre:'1º de ESO'}, {id:'2e', nombre:'2º de ESO'}
+];
+const TODOS = CURSOS.map(c=>c.id);
+const TEMAS = {
+  posicional:{nombre:'Valor de las cifras', cursos:['3p','4p','5p','6p']},
+  suma:{nombre:'Sumas llevando', cursos:['3p','4p','5p']},
+  resta:{nombre:'Restas llevando', cursos:['3p','4p','5p']},
+  tablas:{nombre:'Tablas de multiplicar', cursos:['3p','4p','5p','6p']},
+  multiplicar:{nombre:'Multiplicaciones', cursos:['4p','5p','6p']},
+  dividir:{nombre:'Divisiones', cursos:['4p','5p','6p','1e']},
+  fracciones:{nombre:'Fracciones', cursos:['4p','5p','6p','1e','2e']},
+  decimales:{nombre:'Decimales', cursos:['5p','6p','1e','2e']},
+  porcentajes:{nombre:'Porcentajes', cursos:['6p','1e','2e']},
+  enteros:{nombre:'Números negativos', cursos:['1e','2e']},
+  problemas:{nombre:'Problemas', cursos:TODOS},
+  reloj:{nombre:'Horas y reloj', cursos:['3p','4p','5p','6p']},
+  medida:{nombre:'Medidas', cursos:['3p','4p','5p','6p','1e']},
+  geometria:{nombre:'Geometría', cursos:[]},
+  otro:{nombre:'Otros', cursos:[]}
+};
+const cursoNombre = id => (CURSOS.find(c=>c.id===id)||CURSOS[1]).nombre;
+const nivel = id => Math.max(0, CURSOS.findIndex(c=>c.id===id));
+const temasCurso = id => Object.keys(TEMAS).filter(t => TEMAS[t].cursos.includes(id) && GEN[t]);
+const temaNombre = t => (TEMAS[t]||TEMAS.otro).nombre;
+
+/* ================= Dibujos ================= */
+const POS = ['u','d','c','um','um','um'];
+function digHTML(n){
+  const s = String(Math.abs(Math.round(n)));
+  return s.split('').map((ch,i)=>`<span class="c${POS[s.length-1-i]}">${ch}</span>`).join('');
+}
+function visBloques(n){
+  n = clamp(Math.round(+n||0), 0, 9999);
+  const parts = [
+    ['um', Math.floor(n/1000), 'millar','millares'],
+    ['c', Math.floor(n%1000/100), 'centena','centenas'],
+    ['d', Math.floor(n%100/10), 'decena','decenas'],
+    ['u', n%10, 'unidad','unidades']];
+  let started = false, html = '';
+  for (const [k,cnt,s1,sp] of parts){
+    if (cnt>0) started = true;
+    if (!started && k!=='u') continue;
+    const pieces = cnt>0 ? Array.from({length:cnt},()=>`<span class="pz-${k}">${k==='um'?'1000':''}</span>`).join('') : `<span class="pz-zero">0</span>`;
+    html += `<div class="bgroup"><div class="bpieces">${pieces}</div><span class="lab c${k}">${cnt} ${cnt===1?s1:sp}</span></div>`;
+  }
+  return `<div class="vis"><div class="bloques" role="img" aria-label="${n} en bloques">${html}</div><div class="bignum" style="margin-top:10px">${digHTML(n)}</div></div>`;
+}
+function visPosicional(n){
+  n = clamp(Math.round(Math.abs(+n||0)), 0, 999999);
+  const s = String(n);
+  const labs = ['U','D','C','UM','DM','CM'], cls=['u','d','c','um','um','um'];
+  let th='', td='';
+  for (let i=s.length-1;i>=0;i--){ th += `<th class="th-${cls[i]}">${labs[i]}</th>`; td += `<td class="c${cls[i]}">${s[s.length-1-i]}</td>`; }
+  return `<div class="vis"><table class="pos" aria-label="Tabla de valor posicional de ${n}"><tr>${th}</tr><tr>${td}</tr></table></div>`;
+}
+function numParts(x){
+  const s = typeof x==='number' ? String(Math.round(Math.abs(x)*1000)/1000) : String(x).replace(',','.');
+  const [i,d=''] = s.split('.'); return {i, d};
+}
+function visOperacion(v){
+  const a=+v.a, b=+v.b; if(!Number.isFinite(a)||!Number.isFinite(b)) return '';
+  const sym = {'+':'+','-':'−','x':'×','*':'×','×':'×'}[v.op] || '+';
+  const hasR = v.resultado!==undefined && v.resultado!==null && Number.isFinite(+v.resultado);
+  const rows = [numParts(a), numParts(b)]; if(hasR) rows.push(numParts(+v.resultado));
+  const nI = Math.max(...rows.map(r=>r.i.length)), nD = Math.max(...rows.map(r=>r.d.length));
+  const cols = 1 + nI + (nD? 1+nD : 0);
+  const cellCls = k => 'col-'+(['u','d','c','um','um','um','um'][k]||'um');
+  const line = (r, lead) => {
+    let h = `<div class="cell">${lead}</div>`;
+    const ip = r.i.padStart(nI,' ');
+    for (let j=0;j<nI;j++){ const k=nI-1-j; const ch=ip[j]; h += `<div class="cell ${ch.trim()?cellCls(k):''}"><span class="c${['u','d','c','um','um','um','um'][k]||'um'}">${ch.trim()}</span></div>`; }
+    if (nD){ h += `<div class="cell">${r.d||nD?',':''}</div>`; const dp=r.d.padEnd(nD,' '); for(let j=0;j<nD;j++) h += `<div class="cell col-dec"><span class="cdec">${dp[j].trim()}</span></div>`; }
+    return h;
+  };
+  let h = line(rows[0],'') + line(rows[1],sym) + `<div class="rule" style="grid-column:1/-1"></div>`;
+  h += hasR ? line(rows[2],'') : `<div class="cell"></div><div class="cell q" style="grid-column:2/-1;justify-content:flex-end">?</div>`;
+  return `<div class="vis"><div class="op" style="grid-template-columns:repeat(${cols},auto)" role="img" aria-label="${fmt(a)} ${sym} ${fmt(b)}">${h}</div></div>`;
+}
+function visRecta(v){
+  let a=+v.desde, b=+v.hasta; if(!Number.isFinite(a)||!Number.isFinite(b)||b<=a) return '';
+  const range=b-a; const steps=[0.1,0.2,0.5,1,2,5,10,20,50,100,200,500,1000,2000,5000,10000];
+  const step = steps.find(s=>range/s<=20) || 10000;
+  const W=640, pad=30, y=120, X=val=>pad+(val-a)/range*(W-2*pad);
+  const ticks=[]; for(let t=Math.ceil(a/step-1e-9)*step; t<=b+1e-9; t+=step) ticks.push(Math.round(t*1000)/1000);
+  const every = ticks.length>12 ? 2 : 1;
+  let s = `<line class="axis" x1="${pad-12}" y1="${y}" x2="${W-pad+12}" y2="${y}"/>`;
+  ticks.forEach((t,i)=>{ s+=`<line class="tick" x1="${X(t)}" y1="${y-9}" x2="${X(t)}" y2="${y+9}"/>`; if(i%every===0) s+=`<text x="${X(t)}" y="${y+32}" text-anchor="middle">${fmt(t)}</text>`; });
+  (Array.isArray(v.saltos)?v.saltos:[]).slice(0,6).forEach(j=>{
+    const de=+j.de, aa=+j.a; if(!Number.isFinite(de)||!Number.isFinite(aa)||de===aa) return;
+    const x1=X(clamp(de,a,b)), x2=X(clamp(aa,a,b)), mx=(x1+x2)/2, h=Math.min(70, 25+Math.abs(x2-x1)/4);
+    s+=`<path class="jump" d="M${x1},${y-6} Q${mx},${y-6-h*1.6} ${x2},${y-6}"/>`;
+    const dir = x2>x1?1:-1; s+=`<path class="ah" d="M${x2},${y-4} l${-dir*12},-10 l${dir*2},12 z"/>`;
+    const d = Math.round((aa-de)*1000)/1000; s+=`<text class="jumpl" x="${mx}" y="${y-12-h*.8}" text-anchor="middle">${d>0?'+':''}${fmt(d)}</text>`;
+  });
+  (Array.isArray(v.puntos)?v.puntos:[]).slice(0,6).forEach(p=>{ p=+p; if(Number.isFinite(p)&&p>=a&&p<=b) s+=`<circle class="pt" cx="${X(p)}" cy="${y}" r="8"/>`; });
+  return `<div class="vis"><svg class="recta" viewBox="0 0 ${W} 170" width="100%" style="min-width:420px" role="img" aria-label="Recta numérica de ${fmt(a)} a ${fmt(b)}">${s}</svg></div>`;
+}
+const fracHTML = (n,d,big) => `<span class="frac num ${big?'big':''}"><span>${n}</span><span>${d}</span></span>`;
+function visFraccion(v){
+  const fs = (Array.isArray(v.fracciones)?v.fracciones:[]).slice(0,3);
+  let h='';
+  for (const f of fs){
+    const d=clamp(Math.round(+f.den||0),1,12), n=clamp(Math.round(+f.num||0),0,36);
+    const bars = Math.max(1, Math.ceil(n/d)); let left=n, bh='';
+    for (let b=0;b<bars;b++){ let cells=''; for(let i=0;i<d;i++){ cells+=`<i class="${left>0?'on':''}"></i>`; left--; } bh+=`<div class="fbar">${cells}</div>`; }
+    h += `<div class="frac-item"><div class="fbars">${bh}</div>${fracHTML(n,d,true)}</div>`;
+  }
+  return h ? `<div class="vis"><div class="frac-row">${h}</div></div>` : '';
+}
+function visGrupos(v){
+  const g=Math.round(+v.grupos||0), k=Math.round(+v.porGrupo||0);
+  if (g<1||k<0) return '';
+  if (g>12||k>12) return `<div class="vis"><p><b>${g}</b> grupos de <b>${k}</b></p></div>`;
+  let h=''; for(let i=0;i<g;i++){ h+=`<div class="grp">${'<i></i>'.repeat(k)||'<span class="muted small">0</span>'}</div>`; }
+  return `<div class="vis"><div class="groups" role="img" aria-label="${g} grupos de ${k}">${h}</div><p class="small muted" style="margin-top:8px">${g} ${g===1?'grupo':'grupos'} de ${k}</p></div>`;
+}
+function visReloj(v){
+  const h = ((Math.round(+v.horas)||12)%12+12)%12, m = clamp(Math.round(+v.minutos)||0,0,59);
+  const C=110, rN=84, ang=a=>(a-90)*Math.PI/180, P2=(a,r)=>[C+r*Math.cos(ang(a)), C+r*Math.sin(ang(a))];
+  let s=`<circle class="cara" cx="${C}" cy="${C}" r="104"/>`;
+  for(let i=0;i<60;i++){ const [x1,y1]=P2(i*6,i%5?96:90), [x2,y2]=P2(i*6,101); s+=`<line class="${i%5?'tk':'tk5'}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`; }
+  for(let n=1;n<=12;n++){ const [x,y]=P2(n*30,rN-8); s+=`<text x="${x}" y="${y+6}" text-anchor="middle">${n}</text>`; }
+  const [hx,hy]=P2((h+m/60)*30,50), [mx,my]=P2(m*6,80);
+  s+=`<line class="hh" x1="${C}" y1="${C}" x2="${hx}" y2="${hy}"/><line class="mm" x1="${C}" y1="${C}" x2="${mx}" y2="${my}"/><circle class="eje" cx="${C}" cy="${C}" r="7"/>`;
+  const dig = v.digital ? `<span class="digital">${h||12}:${String(m).padStart(2,'0')}</span>` : '';
+  return `<div class="vis"><div class="reloj-wrap"><svg class="reloj" viewBox="0 0 220 220" role="img" aria-label="Reloj de agujas">${s}</svg>
+    <div class="reloj-leg"><span><i style="background:var(--c)"></i>Aguja corta: la hora</span><span><i style="background:var(--u)"></i>Aguja larga: los minutos</span><span class="small muted">Cada número son 5 minutos</span>${dig}</div></div></div>`;
+}
+const ESCALERAS = {
+  longitud:['km','hm','dam','m','dm','cm','mm'],
+  peso:['kg','hg','dag','g','dg','cg','mg'],
+  capacidad:['kl','hl','dal','l','dl','cl','ml']
+};
+function visEscalera(v){
+  let us = ESCALERAS[v.magnitud];
+  if (!us) us = Object.values(ESCALERAS).find(a=>a.includes(v.desde)) || ESCALERAS.longitud;
+  const a=us.indexOf(v.desde), b=us.indexOf(v.hasta);
+  const lo=Math.min(a,b), hi=Math.max(a,b), n=a>=0&&b>=0?Math.abs(b-a):0;
+  let h='';
+  us.forEach((u,i)=>{
+    if(i>0) h+=`<span class="arr ${a>=0&&b>=0&&i>lo&&i<=hi?'on':''}">${a<=b?'×10':'÷10'}</span>`;
+    h+=`<div class="st"><div class="box ${i===a?'from':i===b?'to':''}">${u}</div></div>`;
+  });
+  const fac = 10**n;
+  const txt = n ? `De ${v.desde} a ${v.hasta} hay ${n} ${n===1?'escalón':'escalones'}: ${b>a?'multiplica':'divide'} por ${fmt(fac)}.` : 'Cada escalón hacia la derecha: ×10. Hacia la izquierda: ÷10.';
+  return `<div class="vis"><div class="esc" role="img" aria-label="Escalera de unidades">${h}</div><p class="small" style="margin-top:8px">${txt}</p></div>`;
+}
+function vis(v){
+  if (!v || typeof v!=='object') return '';
+  try{
+    switch(v.tipo){
+      case 'reloj': return visReloj(v);
+      case 'escalera': return visEscalera(v);
+      case 'bloques': return visBloques(v.numero);
+      case 'posicional': return visPosicional(v.numero);
+      case 'operacion': return visOperacion(v);
+      case 'recta': return visRecta(v);
+      case 'fraccion': return visFraccion(v);
+      case 'grupos': return visGrupos(v);
+      default: return '';
+    }
+  }catch(e){ return ''; }
+}
+function optHTML(o){
+  if (typeof o==='number') return fmt(o);
+  const m = String(o).match(/^\s*(\d+)\s*\/\s*(\d+)\s*$/);
+  if (m) return fracHTML(m[1],m[2],true);
+  return esc(o);
+}
+const optIsText = o => typeof o!=='number' && !/^\s*\d+\s*\/\s*\d+\s*$/.test(String(o)) && String(o).length>9;
+
+/* ================= Generador de ejercicios ================= */
+const COL = ['Unidades','Decenas','Centenas','Millares','Decenas de millar','Centenas de millar'];
+const NOMBRES = ['Lucía','Mateo','Sara','Hugo','Martina','Leo','Vega','Daniel','Alba','Pablo','Noa','Marco'];
+const digs = n => String(n).split('').reverse().map(Number);
+function sinLlevar(a,b){ const A=digs(a),B=digs(b),m=Math.max(A.length,B.length); let o=''; for(let i=0;i<m;i++) o=((A[i]||0)+(B[i]||0))%10+o; return +o; }
+function restaMal(a,b){ const A=digs(a),B=digs(b); let o=''; for(let i=0;i<A.length;i++) o=Math.abs(A[i]-(B[i]||0))+o; return +o; }
+const hayPrestamo = (a,b) => { const A=digs(a),B=digs(b); return A.some((x,i)=>x<(B[i]||0)); };
+function explicaSuma(a,b){
+  const A=digs(a),B=digs(b),m=Math.max(A.length,B.length); let c=0; const out=[];
+  for(let i=0;i<m;i++){ const x=A[i]||0,y=B[i]||0,s=x+y+c; let t=`${COL[i]}: ${x} + ${y}${c?' + 1 que me llevaba':''} = ${s}`;
+    if(s>=10&&i<m-1){ t+=` → escribo ${s%10} y me llevo 1.`; c=1; } else { t+=` → escribo ${s}.`; c=0; } out.push(t); }
+  return out.join(' ');
+}
+function explicaResta(a,b){
+  const A=digs(a),B=digs(b); let c=0; const out=[];
+  for(let i=0;i<A.length;i++){ const x=A[i], bb=B[i]||0, y=bb+c;
+    if(i>=B.length && c===0){ out.push(`${COL[i]}: bajo el ${x}.`); continue; }
+    const pre = c?`${bb} + 1 que me llevaba = ${y}; `:'';
+    if(x>=y){ out.push(`${COL[i]}: ${pre}de ${y} a ${x} van ${x-y}.`); c=0; }
+    else { out.push(`${COL[i]}: ${pre}${x} es menor que ${y}, así que uso ${x+10}: de ${y} a ${x+10} van ${x+10-y} y me llevo 1.`); c=1; }
+  }
+  return out.join(' ');
+}
+function explicaMulti1(a,b){
+  const A=digs(a); let c=0; const out=[];
+  for(let i=0;i<A.length;i++){ const p=A[i]*b+c; let t=`${A[i]} × ${b}${c?` + ${c} que me llevaba`:''} = ${p}`;
+    if(i<A.length-1&&p>=10){ t+=` → escribo ${p%10} y me llevo ${Math.floor(p/10)}.`; c=Math.floor(p/10); } else { t+=` → escribo ${p}.`; c=0; } out.push(t); }
+  return 'Empieza por las unidades. '+out.join(' ');
+}
+function multiMal(a,b){ const A=digs(a); let o=''; for(const x of A) o=(x*b)%10+o; return +o; }
+function randLen(len){ let s=String(R(1,9)); for(let i=1;i<len;i++) s+=R(0,9); return +s; }
+
+function mk(tema, texto, correcta, falsas, extra={}){
+  const key = v => typeof v==='number' ? String(Math.round(v*1000)/1000) : String(v).replace(/\s/g,'');
+  const set=[correcta];
+  for (const f of falsas){
+    if (set.length>=3) break;
+    if (f===undefined||f===null||(typeof f==='number'&&!Number.isFinite(f))) continue;
+    if (typeof f==='number' && f<0 && !extra.neg) continue;
+    if (!set.some(s=>key(s)===key(f))) set.push(f);
+  }
+  let t=0; while(set.length<3 && t<60 && typeof correcta==='number'){ t++; const f=correcta+pick([1,2,-1,-2,10,-10,5]); if((f>=0||extra.neg)&&!set.some(s=>key(s)===key(f))) set.push(f); }
+  const opciones = shuffle(set);
+  const q = {tema, texto, opciones, correcta: opciones.findIndex(o=>key(o)===key(correcta)), explicacion: extra.explicacion||''};
+  if (extra.visual) q.visual = extra.visual;
+  if (extra.visualExp) q.visualExp = extra.visualExp;
+  return q;
+}
+
+const GEN = {
+  posicional(L){
+    const v = L<=2 ? pick(['A','B','B']) : pick(['A','C']);
+    if (v==='B'){
+      const um = L>=1 ? R(0,4) : 0, c=R(1,9), d=pick([0,R(1,9),R(1,9)]), u=R(0,9);
+      const n=um*1000+c*100+d*10+u;
+      const falsas=[ d===0 ? +(`${um||''}${c}${u}`) : +(`${um||''}${c}${u}${d}`), n+10, n+100, u*100+d*10+c ];
+      return mk('posicional','¿Qué número forman estos bloques?', n, falsas, {visual:{tipo:'bloques',numero:n},
+        explicacion:`Cuenta cada color: ${um?um+' millares, ':''}${c} centenas, ${d} decenas y ${u} unidades → ${fmt(n)}.${d===0?' Si no hay decenas, se escribe un 0 en su sitio.':''}`});
+    }
+    if (v==='C'){
+      const n=randLen(R(5,6)), D=digs(n); let p=R(1,D.length-1); while(D[p]===0) p=R(1,D.length-1);
+      const val=D[p]*10**p;
+      return mk('posicional',`¿Cuánto vale la cifra ${D[p]} en el número ${fmt(n)}?`, val, [D[p], D[p]*10**(p-1), D[p]*10**(p+1)], {visualExp:{tipo:'posicional',numero:n},
+        explicacion:`El ${D[p]} está en las ${COL[p].toLowerCase()}, así que vale ${fmt(val)}.`});
+    }
+    const len=[3,4,5,6,6,6][L]; const n=randLen(len), D=digs(n), p=R(0,len-1);
+    const otras = D.filter((x,i)=>i!==p);
+    return mk('posicional',`En el número ${fmt(n)}, ¿qué cifra está en las ${COL[p].toLowerCase()}?`, D[p], shuffle(otras), {visualExp:{tipo:'posicional',numero:n},
+      explicacion:`Cuenta desde la derecha: unidades, decenas, centenas… En las ${COL[p].toLowerCase()} está el ${D[p]}.`});
+  },
+  suma(L){
+    const rg=[[10,99],[100,999],[1000,9999],[1000,99999],[1000,99999],[1000,99999]][L];
+    let a,b,t=0; do{ a=R(rg[0],rg[1]); b=R(rg[0],rg[1]); t++; } while(sinLlevar(a,b)===a+b && t<40);
+    const s=a+b;
+    return mk('suma',`¿Cuánto es ${fmt(a)} + ${fmt(b)}?`, s, [sinLlevar(a,b), s+10, s-10, s+1], {visual:{tipo:'operacion',a,b,op:'+'}, explicacion:explicaSuma(a,b)});
+  },
+  resta(L){
+    const rg=[[30,99],[200,999],[1000,9999],[1000,99999],[1000,99999],[1000,99999]][L];
+    let a,b,t=0; do{ a=R(rg[0],rg[1]); b=R(Math.max(10,Math.floor(rg[0]/3)),a-1); t++; } while(!hayPrestamo(a,b) && t<40);
+    const d=a-b;
+    return mk('resta',`¿Cuánto es ${fmt(a)} − ${fmt(b)}?`, d, [restaMal(a,b), d+10, d-10, d+1], {visual:{tipo:'operacion',a,b,op:'-'}, explicacion:explicaResta(a,b)});
+  },
+  tablas(L){
+    const a=R(2,9), b=R(2,10), p=a*b;
+    const seq=Array.from({length:a},(_,i)=>(i+1)*b).join(', ');
+    return mk('tablas',`¿Cuánto es ${a} × ${b}?`, p, [a*(b+1), a*(b-1), (a+1)*b, p+1], {visualExp:{tipo:'grupos',grupos:a,porGrupo:b},
+      explicacion:`${a} × ${b} son ${a} grupos de ${b}. Cuenta de ${b} en ${b}: ${seq}.`});
+  },
+  multiplicar(L){
+    let a,b;
+    if (L<=1){ a=R(12,99); b=R(3,9); } else if (L===2){ a=R(100,999); b=R(3,9); } else if (Math.random()<.5){ a=R(100,999); b=R(3,9); } else { a=R(21,99); b=R(12,49); }
+    const p=a*b;
+    if (b<10) return mk('multiplicar',`¿Cuánto es ${fmt(a)} × ${b}?`, p, [multiMal(a,b), p+b, p-10, p+10], {visual:{tipo:'operacion',a,b,op:'x'}, explicacion:explicaMulti1(a,b)});
+    const bt=Math.floor(b/10)*10, bu=b%10;
+    return mk('multiplicar',`¿Cuánto es ${a} × ${b}?`, p, [a*bt+bu, a*bu, p+a, p-10], {visual:{tipo:'operacion',a,b,op:'x'},
+      explicacion:`Parte el ${b} en ${bt} + ${bu}: ${a} × ${bt} = ${fmt(a*bt)} y ${a} × ${bu} = ${fmt(a*bu)}. Súmalos: ${fmt(a*bt)} + ${fmt(a*bu)} = ${fmt(p)}.`});
+  },
+  dividir(L){
+    const d=R(2,9);
+    if (L<=1 || Math.random()<.6){
+      const q = L<=1 ? R(2,10) : R(11,40), D=d*q;
+      return mk('dividir',`¿Cuánto es ${fmt(D)} : ${d}?`, q, [q+1, q-1, q+10, D-d], {visualExp: D<=60?{tipo:'grupos',grupos:d,porGrupo:q}:null,
+        explicacion:`Dividir es repartir en ${d} partes iguales. Busca qué número multiplicado por ${d} da ${D}: ${d} × ${q} = ${fmt(D)}. Le tocan ${q} a cada parte.`});
+    }
+    const q=R(5,30), r=R(1,d-1), D=d*q+r;
+    return mk('dividir',`Reparte ${fmt(D)} caramelos entre ${d} niños a partes iguales. ¿Cuántos sobran?`, r, [r+1<d?r+1:null, r-1, d-r, q], {
+      explicacion:`A cada niño le tocan ${q}, porque ${d} × ${q} = ${d*q}. De ${d*q} a ${D} faltan ${r}: sobran ${r}. El resto siempre es más pequeño que ${d}.`});
+  },
+  fracciones(L){
+    const v = L<=1 ? pick(['A','B']) : pick(['A','B','C']);
+    if (v==='A'){
+      const den=R(2,8), num=R(1,den-1);
+      return mk('fracciones','¿Qué fracción de la barra está pintada?', `${num}/${den}`, [`${den-num}/${den}`, `${num}/${den+1}`, `${den}/${num}`, `${num}/${den-num||1}`], {visual:{tipo:'fraccion',fracciones:[{num,den}]},
+        explicacion:`Abajo va en cuántas partes iguales está dividida la barra (${den}). Arriba, cuántas están pintadas (${num}).`});
+    }
+    if (v==='B'){
+      const den=pick([2,3,4,5]), q=R(2,6), tot=den*q, num = L<=1 ? 1 : R(1,den-1);
+      return mk('fracciones',`¿Cuánto es ${num}/${den} de ${tot}?`, num*q, [q===num*q?null:q, tot-num*q, tot, num*q+den], {visualExp:{tipo:'grupos',grupos:den,porGrupo:q},
+        explicacion:`Reparte ${tot} en ${den} grupos iguales: salen ${q} en cada grupo. Coge ${num} ${num===1?'grupo':'grupos'}: ${num*q}.`});
+    }
+    const den=R(4,10); let a=R(1,den-1), b=R(1,den-1); while(b===a) b=R(1,den-1);
+    const mayor = a>b?`${a}/${den}`:`${b}/${den}`;
+    return mk('fracciones','¿Qué fracción es mayor?', mayor, [`${a}/${den}`,`${b}/${den}`,'Son iguales'], {visualExp:{tipo:'fraccion',fracciones:[{num:a,den},{num:b,den}]},
+      explicacion:`Las dos barras tienen partes del mismo tamaño (${den}). Gana la que tiene más partes pintadas.`});
+  },
+  decimales(L){
+    if (Math.random()<.5){
+      let a,b,t=0; do{ a=R(11,89); b=R(11,89); t++; } while((a%10)+(b%10)<10 && t<40);
+      const s=(a+b)/10, mal=`${Math.floor(a/10)+Math.floor(b/10)},${(a%10)+(b%10)}`;
+      return mk('decimales',`¿Cuánto es ${fmt(a/10)} + ${fmt(b/10)}?`, fmt(s), [mal, fmt(s+1), fmt(s-0.1)], {visual:{tipo:'operacion',a:a/10,b:b/10,op:'+'},
+        explicacion:`Pon las comas una debajo de otra. Décimas: ${a%10} + ${b%10} = ${(a%10)+(b%10)} → escribo ${((a%10)+(b%10))%10} y me llevo 1 a las unidades. Resultado: ${fmt(s)}.`});
+    }
+    const x=R(3,9)/10, y=Math.round(x*100-R(1,9))/100, z=Math.round(x*1000-(R(1,8)*10+R(1,9)))/1000;
+    return mk('decimales','¿Cuál de estos números es el mayor?', fmt(x), [fmt(y), fmt(z)], {visualExp:{tipo:'recta',desde:0,hasta:1,puntos:[x,y,z]},
+      explicacion:`Iguala las cifras decimales con ceros: ${fmt(x).padEnd(5,'0')} · ${fmt(y).padEnd(5,'0')} · ${fmt(z).padEnd(5,'0')}. Ahora compara como números normales: gana ${fmt(x)}.`});
+  },
+  porcentajes(L){
+    const p=pick([10,20,25,50,75]), n=20*R(1,15), c=n*p/100;
+    const truco={10:'El 10 % es dividir entre 10.',20:'El 20 % es el doble del 10 %.',25:'El 25 % es la cuarta parte: divide entre 4.',50:'El 50 % es la mitad.',75:'El 75 % son tres cuartas partes: divide entre 4 y multiplica por 3.'}[p];
+    return mk('porcentajes',`¿Cuánto es el ${p} % de ${n}?`, c, [n-c, p, c*2, n/10], {explicacion:`${truco} ${p} % de ${n} = ${fmt(c)}.`});
+  },
+  enteros(L){
+    const t=R(-8,4), s=R(2,9), sube=Math.random()<.5, r = sube? t+s : t-s;
+    const f = x => `${fmt(x)} °C`;
+    return mk('enteros',`A las 8 de la mañana hay ${f(t)}. La temperatura ${sube?'sube':'baja'} ${s} grados. ¿Qué temperatura hace ahora?`, f(r), [f(-r), f(sube?t-s:t+s), f(r+1)], {neg:true,
+      visualExp:{tipo:'recta',desde:Math.min(t,r)-2,hasta:Math.max(t,r)+2,saltos:[{de:t,a:r}],puntos:[t]},
+      explicacion:`En la recta, empieza en ${fmt(t)} y ${sube?'avanza':'retrocede'} ${s} saltos ${sube?'a la derecha':'a la izquierda'}. Llegas a ${fmt(r)}.`});
+  },
+  reloj(L){
+    const v = L===0 ? pick(['A','A','B']) : pick(['A','A','B','C']);
+    if (v==='A'){
+      const h=R(1,12), m = L===0 ? pick([0,15,30,45]) : pick([0,5,10,15,20,25,30,35,40,45,50,55]);
+      const cand = [horaTexto(m/5||12, (h*5)%60), horaTexto(h, m===0?30:m===30?0:m), horaTexto(m>30?h:(h===1?12:h-1), m), horaTexto(h,(m+5)%60), horaTexto(h,(m+55)%60)];
+      const q = mk('reloj','¿Qué hora marca el reloj?', horaTexto(h,m), cand, {visual:{tipo:'reloj',horas:h,minutos:m},
+        visualExp:{tipo:'reloj',horas:h,minutos:m,digital:true},
+        explicacion: `La aguja larga (azul) está en el ${m===0?12:m/5}: son ${m} minutos.${m>30?` Como pasa de la media, se dice "menos ${60-m}" de la hora siguiente.`:''} La aguja corta (naranja) marca la hora. El reloj marca: ${horaTexto(h,m).toLowerCase()}.`});
+      return q;
+    }
+    if (v==='B'){
+      const hh=R(9,19), mm=pick([0,15,30,45,10,20,40]), dh=R(0,2), dm=pick([15,20,30,40,45,50]);
+      const tot=hh*60+mm+dh*60+dm, fh=Math.floor(tot/60)%24, fm=tot%60, hm=(a,b)=>`${a}:${String(b).padStart(2,'0')}`;
+      const qué = pick([['La película empieza','dura'],['El partido empieza','dura'],['La excursión sale','dura']]);
+      const dur = dh ? `${dh} ${dh===1?'hora':'horas'} y ${dm} minutos` : `${dm} minutos`;
+      return mk('reloj',`${qué[0]} a las ${hm(hh,mm)} y ${qué[1]} ${dur}. ¿A qué hora termina?`, hm(fh,fm),
+        [hm((hh+dh)%24,(mm+dm)%60), hm(fh+1,fm), hm(hh+dh,mm), hm(fh,(fm+10)%60)], {
+        explicacion:`Suma primero las horas: ${hm(hh,mm)} + ${dh} ${dh===1?'hora':'horas'} = ${hm(hh+dh,mm)}. Luego los minutos: ${mm} + ${dm} = ${mm+dm}${mm+dm>=60?`, que es 1 hora y ${mm+dm-60} minutos`:''}. Termina a las ${hm(fh,fm)}.`});
+    }
+    const hrs=R(1,4), extra=pick([[15,'cuarto'],[30,'media'],[45,'tres cuartos']]), c=hrs*60+extra[0];
+    return mk('reloj',`¿Cuántos minutos son ${hrs} ${hrs===1?'hora':'horas'} y ${extra[1]}?`, c, [hrs*100+extra[0], hrs*60, c+15, hrs+extra[0]], {
+      explicacion:`Cada hora tiene 60 minutos: ${hrs} × 60 = ${hrs*60}. Y ${extra[1]} de hora son ${extra[0]} minutos. ${hrs*60} + ${extra[0]} = ${c}.`});
+  },
+  medida(L){
+    const v = pick(L===0?['A','B','B']:['A','A','B','C']);
+    if (v==='A'){
+      const pares = [['longitud','km','m'],['longitud','m','cm'],['longitud','cm','mm'],['longitud','m','mm'],['peso','kg','g'],['capacidad','l','ml'],['capacidad','l','cl'],['longitud','m','dm']];
+      const [mag,from,to] = pick(L===0?pares.slice(1,3):pares);
+      const us=ESCALERAS[mag], n=us.indexOf(to)-us.indexOf(from), fac=10**n;
+      const alReves = L>=1 && Math.random()<.35;
+      if (alReves){
+        const k=R(2,9), big=k*fac;
+        return mk('medida',`¿Cuántos ${from} son ${fmt(big)} ${to}?`, k, [big*10, k*10, big/10], {visualExp:{tipo:'escalera',magnitud:mag,desde:to,hasta:from},
+          explicacion:`De ${to} a ${from} se ${n===1?'sube 1 escalón':'suben '+n+' escalones'} en la escalera: se divide entre ${fmt(fac)}. ${fmt(big)} : ${fmt(fac)} = ${k}.`});
+      }
+      const x = L>=2 && Math.random()<.5 ? R(11,99)/10 : R(2,9);
+      const r = Math.round(x*fac*1000)/1000;
+      return mk('medida',`¿Cuántos ${to} son ${fmt(x)} ${from}?`, r, [r/10, r*10, x+fac], {visualExp:{tipo:'escalera',magnitud:mag,desde:from,hasta:to},
+        explicacion:`De ${from} a ${to} se ${n===1?'baja 1 escalón':'bajan '+n+' escalones'} en la escalera: se multiplica por ${fmt(fac)}. ${fmt(x)} × ${fmt(fac)} = ${fmt(r)}.`});
+    }
+    if (v==='B'){
+      const it = pick([
+        ['el largo de un lápiz','cm',['km','kg']], ['la distancia entre dos ciudades','km',['cm','l']], ['el agua de una bañera','l',['g','cm']],
+        ['lo que pesa una manzana','g',['km','l']], ['lo que pesa una persona','kg',['ml','m']], ['la altura de una puerta','m',['mm','kg']],
+        ['una cucharada de jarabe','ml',['kg','km']], ['el grosor de una moneda','mm',['km','l']], ['lo que pesa un saco de patatas','kg',['ml','cm']]]);
+      return mk('medida',`¿Qué unidad usarías para medir ${it[0]}?`, it[1], it[2], {
+        explicacion:`Para medir ${it[0]} usamos ${it[1]}. Longitud: km, m, cm, mm. Peso: kg, g. Capacidad: l, ml.`});
+    }
+    const kg=R(1,3), g = pick([kg*1000, kg*1000-R(1,9)*100, kg*1000+R(1,9)*100, R(2,9)*100]);
+    const correcta = kg*1000>g ? `${kg} kg` : kg*1000<g ? `${fmt(g)} g` : 'Pesan lo mismo';
+    return mk('medida',`¿Qué pesa más: ${kg} kg de arroz o ${fmt(g)} g de arroz?`, correcta, [`${kg} kg`,`${fmt(g)} g`,'Pesan lo mismo'], {visualExp:{tipo:'escalera',magnitud:'peso',desde:'kg',hasta:'g'},
+      explicacion:`Pásalo todo a gramos: ${kg} kg = ${fmt(kg*1000)} g. Ahora compara ${fmt(kg*1000)} g con ${fmt(g)} g.`});
+  },
+  problemas(L){
+    const n=pick(NOMBRES), tipo = L===0 ? pick(['suma','resta','mult']) : pick(['suma','resta','mult','div']);
+    const rg=[[5,40],[20,400],[100,3000],[100,9000],[100,9000],[100,9000]][L];
+    if (tipo==='suma'){ const a=R(rg[0],rg[1]), b=R(rg[0],rg[1]);
+      return mk('problemas',`${n} tiene ${fmt(a)} cromos y le regalan ${fmt(b)}. ¿Cuántos cromos tiene ahora?`, a+b, [Math.abs(a-b), a+b+10, a+b-1], {visual:{tipo:'operacion',a,b,op:'+'},
+        explicacion:`"Le regalan" significa que tiene más, así que se suma: ${fmt(a)} + ${fmt(b)} = ${fmt(a+b)}.`}); }
+    if (tipo==='resta'){ const a=R(rg[0]*2,rg[1]*2), b=R(rg[0],a-1);
+      return mk('problemas',`En un tren van ${fmt(a)} personas. En una parada se bajan ${fmt(b)}. ¿Cuántas personas quedan en el tren?`, a-b, [a+b, a-b+10, a-b-1], {visual:{tipo:'operacion',a,b,op:'-'},
+        explicacion:`"Se bajan" significa que quedan menos, así que se resta: ${fmt(a)} − ${fmt(b)} = ${fmt(a-b)}.`}); }
+    if (tipo==='mult'){ const g=R(3,9), k=L>=2?R(6,25):R(3,9);
+      return mk('problemas',`Hay ${g} cajas con ${k} lápices en cada una. ¿Cuántos lápices hay en total?`, g*k, [g+k, g*k+k, g*k-g], {visualExp:{tipo:'grupos',grupos:g,porGrupo:k},
+        explicacion:`Son ${g} grupos iguales de ${k}: se multiplica. ${g} × ${k} = ${g*k}.`}); }
+    const d=R(2,6), q=L>=2?R(5,15):R(2,9), D=d*q;
+    return mk('problemas',`${n} reparte ${D} galletas entre ${d} amigos, a partes iguales. ¿Cuántas le tocan a cada uno?`, q, [D-d, q+1, D+d], {visualExp:{tipo:'grupos',grupos:d,porGrupo:q},
+      explicacion:`"Repartir a partes iguales" es dividir: ${D} : ${d} = ${q}, porque ${d} × ${q} = ${D}.`});
+  }
+};
+
+/* ================= Consejos para el altavoz (sin decir la respuesta) ================= */
+function numsDe(t){ return (String(t).match(/\d[\d\u202F.]*/g)||[]).map(x=>+x.replace(/[\u202F.]/g,'')); }
+function consejo(q){
+  const t=q.texto||'', v=q.visual||{}, ve=q.visualExp||{};
+  try{
+    switch(q.tema){
+      case 'suma': { const A=digs(v.a),B=digs(v.b);
+        return `Pon los números uno debajo del otro: unidades con unidades. Empieza por la derecha, por las unidades azules: ${A[0]} más ${B[0]}. Si te da 10 o más, escribe solo la última cifra y llévate 1 a las decenas verdes. Luego haz lo mismo con las decenas y las centenas.`; }
+      case 'resta': { const A=digs(v.a),B=digs(v.b);
+        return `Empieza por la derecha, por las unidades azules. Arriba hay un ${A[0]} y abajo un ${B[0]}. ` + (A[0]<B[0]
+          ? `Como ${A[0]} es más pequeño que ${B[0]}, ponle un 1 delante al de arriba y piensa: de ${B[0]} a ${A[0]+10}, ¿cuántos van? No te olvides de que te llevas 1: se suma al número de abajo de la siguiente columna.`
+          : `Piensa: de ${B[0]} a ${A[0]}, ¿cuántos van? Luego sigue con las decenas verdes, de la misma forma.`); }
+      case 'multiplicar': { const A=digs(v.a);
+        return +v.b<10 ? `Multiplica el ${v.b} por cada cifra de arriba, empezando por la derecha: primero ${A[0]} por ${v.b}. Si te sale 10 o más, escribe la última cifra y guarda las decenas para sumarlas en la siguiente columna.`
+          : `Parte el ${v.b} en dos trozos: ${Math.floor(v.b/10)*10} y ${v.b%10}. Multiplica ${v.a} por cada trozo y al final suma los dos resultados.`; }
+      case 'tablas': { const a=ve.grupos, b=ve.porGrupo;
+        return `${a} por ${b} es lo mismo que ${a} grupos de ${b}. Cuenta de ${b} en ${b}, ${a} veces. Puedes ir levantando un dedo en cada salto.`; }
+      case 'dividir': { const [D,d]=numsDe(t);
+        return /sobran/.test(t) ? `Busca en la tabla del ${d} el número más grande que no se pase de ${D}. Lo que falta desde ese número hasta ${D} es lo que sobra.`
+          : `Dividir es repartir en partes iguales. Piensa en la tabla del ${d}: ¿qué número multiplicado por ${d} da ${D}? Ve probando: ${d} por 2, ${d} por 3…`; }
+      case 'fracciones':
+        if (/pintada/.test(t)) return 'Cuenta en cuántas partes iguales está dividida la barra: ese número va abajo. Luego cuenta las partes pintadas: ese va arriba.';
+        if (/mayor/.test(t)) return 'Si el número de abajo es el mismo, las partes son del mismo tamaño. Gana la fracción que tiene más partes, es decir, el número de arriba más grande.';
+        return 'Primero reparte el total en tantos grupos iguales como dice el número de abajo. Después coge tantos grupos como dice el número de arriba y cuenta cuántos tienes.';
+      case 'decimales':
+        return /mayor/.test(t) ? 'Truco: añade ceros al final para que todos los números tengan las mismas cifras después de la coma. Así se comparan como números normales.'
+          : 'Pon las comas una debajo de la otra. Suma primero las cifras de después de la coma. Si pasan de 9, te llevas 1 a las unidades. La coma del resultado va en el mismo sitio.';
+      case 'porcentajes': return 'El 50 por ciento es la mitad. El 25 por ciento es la cuarta parte. El 10 por ciento es dividir entre 10. Busca cuál es el tuyo.';
+      case 'enteros': return 'Imagina un termómetro. Los números bajo cero están por debajo del 0. Si la temperatura sube, avanza hacia arriba; si baja, hacia abajo. Cuenta los saltos uno a uno.';
+      case 'problemas': return 'Lee el problema despacio, dos veces. Busca las palabras pista: «le regalan» o «en total» suelen ser sumar; «se bajan» o «quedan», restar; «cajas con… en cada una», multiplicar; «reparte», dividir.';
+      case 'posicional':
+        if (/bloques/.test(t)) return 'Cuenta los bloques de cada color por separado. Morados, millares. Naranjas, centenas. Verdes, decenas. Azules, unidades. Escribe cada número en su sitio, y si falta un color, pon un 0.';
+        if (/vale/.test(t)) return 'Mira en qué lugar está la cifra, contando desde la derecha. Vale la cifra con tantos ceros como cifras tenga a su derecha.';
+        return 'Cuenta desde la derecha y señala con el dedo: unidades, decenas, centenas, millares.';
+      case 'reloj':
+        if (/marca/.test(t)) return 'Mira primero la aguja larga, la azul: cada número vale 5 minutos, cuenta de 5 en 5 desde el 12. Luego mira la corta, la naranja: te dice la hora. Si la larga ha pasado del 6, se dice «menos» y la hora siguiente.';
+        if (/termina/.test(t)) return 'Suma primero las horas y luego los minutos. Si los minutos llegan a 60 o más, son una hora más.';
+        return 'Una hora son 60 minutos. Media hora son 30 minutos. Un cuarto de hora son 15 minutos.';
+      case 'medida':
+        if (/unidad usar/.test(t)) return 'Piensa qué mides: lo largo que es algo, en metros; lo que pesa, en kilos o gramos; o el líquido que cabe, en litros. Después piensa si es algo grande o pequeño.';
+        if (/pesa más/.test(t)) return 'Para comparar, pasa todo a la misma unidad. Un kilo son 1000 gramos.';
+        if (ve.tipo==='escalera') return `Usa la escalera de unidades, de ${ve.desde} a ${ve.hasta}. Cada escalón hacia abajo se multiplica por 10, y hacia arriba se divide entre 10. Cuenta los escalones.`;
+        return '';
+    }
+  }catch(e){}
+  return '';
+}
+
+/* ================= Datos: perfil e historial ================= */
+const PERFIL0 = () => ({nombre:'', curso:'4p', estrellas:0, racha:0, rachaMax:0, ultimoDia:'', dias:[], temas:{}, errores:[], insignias:[], stats:{fotos:0,examenes:0,perfectos:0,vencidos:0}});
+let P = null, SES = [];
+const LS = 'numerin-v1', LS_IA = 'numerin-ia';
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } }
+function lsSet(k,o){ try{ localStorage.setItem(k, JSON.stringify(o)); return true; }catch(e){ return false; } }
+function loadData(){ const o=lsGet(LS); P = o && o.perfil ? Object.assign(PERFIL0(), o.perfil) : null; SES = (o && o.sesiones) || []; }
+function guardar(){ if(!lsSet(LS,{perfil:P, sesiones:SES})){ SES.length=Math.min(SES.length,60); if(!lsSet(LS,{perfil:P, sesiones:SES})) toast('No se ha podido guardar: el móvil no deja espacio.'); } }
+function savePerfil(){ guardar(); }
+function addSesion(s){ SES.unshift(s); if (SES.length>150) SES.length=150; guardar(); }
+function marcarDia(){
+  const d=hoy(); if (P.ultimoDia===d) return;
+  P.racha = P.ultimoDia===ayer() ? P.racha+1 : 1; P.rachaMax=Math.max(P.rachaMax||0,P.racha);
+  P.ultimoDia=d; if(!P.dias.includes(d)) P.dias.push(d); if(P.dias.length>400) P.dias.shift();
+}
+function anotarTema(t, ok){
+  if (!TEMAS[t]) t='otro';
+  const e = P.temas[t] || (P.temas[t]={a:0,f:0,u:''});
+  ok ? e.a++ : e.f++; e.u = hoy();
+}
+
+/* Premios */
+const PEGATINAS = ['🐢','🦊','🐼','🦉','🐙','🦋','🐬','🦁','🐸','🦄','🐝','🦒','🐧','🦔','🐳','🦜','🐞','🦩','🦥','🐿️','🦭','🐠','🐨','🐉'];
+const CADA = 15;
+const INSIGNIAS = [
+  {id:'foto1', n:'Detective de ejercicios', d:'Explicar un ejercicio con una foto', t:p=>p.stats.fotos>=1},
+  {id:'examen1', n:'Primer examen', d:'Terminar tu primer examen', t:p=>p.stats.examenes>=1},
+  {id:'perfecto', n:'Examen perfecto', d:'Acertar todas las preguntas de un examen', t:p=>p.stats.perfectos>=1},
+  {id:'racha3', n:'Tres días seguidos', d:'Practicar 3 días seguidos', t:p=>(p.rachaMax||0)>=3},
+  {id:'racha7', n:'Una semana entera', d:'Practicar 7 días seguidos', t:p=>(p.rachaMax||0)>=7},
+  {id:'e50', n:'50 estrellas', d:'Juntar 50 estrellas', t:p=>p.estrellas>=50},
+  {id:'e200', n:'200 estrellas', d:'Juntar 200 estrellas', t:p=>p.estrellas>=200},
+  {id:'vencer', n:'Vences a tus errores', d:'Acertar 5 preguntas que antes fallaste', t:p=>p.stats.vencidos>=5},
+  {id:'domina', n:'Dominas un tema', d:'15 aciertos en un tema con más del 85 % bien', t:p=>Object.values(p.temas).some(e=>e.a>=15 && e.a/(e.a+e.f)>=.85)}
+];
+function darEstrellas(n){
+  const antes = Math.floor(P.estrellas/CADA); P.estrellas += n; const despues = Math.floor(P.estrellas/CADA);
+  const nuevas=[]; for (const b of INSIGNIAS) if (!P.insignias.includes(b.id) && b.t(P)){ P.insignias.push(b.id); nuevas.push(b.n); }
+  const peg = []; for(let i=antes;i<despues && i<PEGATINAS.length;i++) peg.push(PEGATINAS[i]);
+  return {nuevas, peg};
+}
+function premiosHTML(r){
+  let h='';
+  if (r.peg.length) h += `<p><b>¡Pegatina nueva!</b> <span style="font-size:1.8rem" class="pop">${r.peg.join(' ')}</span></p>`;
+  if (r.nuevas.length) h += `<p><b>Medalla:</b> ${r.nuevas.map(esc).join(', ')}</p>`;
+  return h;
+}
+
+function avatarHTML(p, size){ const cls='avatar'+(size?' '+size:''); return p && p.foto ? `<span class="${cls}"><img src="${p.foto}" alt=""></span>` : `<span class="${cls}" aria-hidden="true">${esc(((p&&p.nombre)||'?').trim().charAt(0).toUpperCase()||'?')}</span>`; }
+function fotoCuadrada(file, lado=256){
+  return new Promise((ok,ko)=>{
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{ const w=img.naturalWidth,h=img.naturalHeight,m=Math.min(w,h); const c=document.createElement('canvas'); c.width=c.height=lado;
+      c.getContext('2d').drawImage(img,(w-m)/2,(h-m)/2,m,m,0,0,lado,lado); URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg',.82)); };
+    img.onerror=()=>{ URL.revokeObjectURL(url); ko(); };
+    img.src=url;
+  });
+}
+
+/* ================= Navegación y cabecera ================= */
+let VIEW='inicio';
+function show(v){
+  VIEW=v;
+  for (const id of ['carga','perfil','inicio','foto','examen','premios','progreso']) $('#v-'+id).hidden = id!==v;
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-current', b.dataset.view===v?'page':'false'));
+  ({inicio:renderInicio, foto:renderFoto, examen:renderExamen, premios:renderPremios, progreso:renderProgreso, perfil:renderPerfil})[v]?.();
+  window.scrollTo({top:0});
+}
+$('#tabs').addEventListener('click', e=>{ const b=e.target.closest('button[data-view]'); if(b) show(b.dataset.view); });
+$('#whoBtn').addEventListener('click', ()=>show('perfil'));
+function renderHeader(){
+  const on = !!(P && P.nombre);
+  $('#tabs').hidden = !on; $('#whoBtn').hidden=!on; $('#starPill').hidden=!on; $('#streakPill').hidden=!on;
+  if (!on) return;
+  $('#whoBtn').innerHTML = `${avatarHTML(P)}${esc(P.nombre)} · ${esc(cursoNombre(P.curso).replace(' de Primaria',' Prim.').replace(' de ESO',' ESO'))}`;
+  $('#starPill').innerHTML = `${ICON.star}<span class="num">${P.estrellas}</span>`;
+  $('#starPill').setAttribute('aria-label', P.estrellas+' estrellas');
+  const r = P.ultimoDia===hoy()||P.ultimoDia===ayer() ? P.racha : 0;
+  $('#streakPill').innerHTML = `${ICON.fire}<span class="num">${r}</span> ${r===1?'día':'días'}`;
+}
+
+/* ================= Perfil ================= */
+let FOTO_TMP;
+function renderPerfil(){
+  const nuevo = !P || !P.nombre;
+  const p = P || PERFIL0(), c = ia();
+  $('#v-perfil').innerHTML = `<div class="stack"><div class="card">
+    ${nuevo ? `<span class="eyebrow">Bienvenida a Numerín</span><h2>Vamos a preparar tu cuaderno</h2>
+      <p class="muted">Numerín te ayuda con los ejercicios de mates que te cuestan: le haces una foto y te lo explica con dibujos, paso a paso. También te pone exámenes, te da premios y recuerda lo que has practicado.</p>` :
+      `<h2>Tu cuaderno</h2>`}
+    <div class="avatar-row"><span id="pAvatar">${avatarHTML(Object.assign({},p,{foto:FOTO_TMP===undefined?p.foto:FOTO_TMP}),'big')}</span>
+      <div class="stack" style="gap:8px"><b>Tu foto</b>
+        <label class="btn ghost" for="pFotoCam">${ICON.cam} Hacerme una foto<input type="file" id="pFotoCam" class="hidden-input" accept="image/*" capture="user"></label>
+        <label class="btn ghost" for="pFotoGal">Elegir de la galería<input type="file" id="pFotoGal" class="hidden-input" accept="image/*"></label>
+        <button type="button" class="linkbtn" id="pQuitar" ${(FOTO_TMP===undefined?p.foto:FOTO_TMP)?'':'hidden'}>Quitar foto</button></div></div>
+    <label class="f" for="pNombre">¿Cómo te llamas?<input type="text" id="pNombre" maxlength="30" value="${esc(p.nombre)}" autocomplete="off"></label>
+    <label class="f" for="pCurso">¿En qué curso estás?<select id="pCurso">${CURSOS.map(x=>`<option value="${x.id}" ${x.id===p.curso?'selected':''}>${x.nombre}</option>`).join('')}</select></label>
+    <p class="small muted">Cuando pases de curso, cámbialo aquí. Los exámenes se adaptan solos y tu historial se queda guardado.</p>
+    <div class="row"><button type="button" class="btn primary big" id="pSave">${nuevo?'Empezar':'Guardar'}</button>${nuevo?'':'<button type="button" class="btn ghost" id="pBack">Volver</button>'}</div>
+  </div>
+  <div class="card" id="ajustes">
+    <span class="eyebrow">Ajustes para mayores</span>
+    <h3>IA de Google (Gemini), gratis</h3>
+    <p class="small muted">Sirve para leer las fotos de los ejercicios. La clave es gratuita y se consigue en 2 minutos con una cuenta de Google:</p>
+    <ol class="small" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px">
+      <li>Abre <a href="${KEY_URL}" target="_blank" rel="noopener"><b>aistudio.google.com/apikey</b></a> y entra con tu cuenta de Google.</li>
+      <li>Pulsa <b>«Create API key»</b> (Crear clave de API). Si pregunta por un proyecto, deja el que sale.</li>
+      <li>Copia la clave (empieza por <b>AIza</b>) y pégala aquí debajo.</li>
+    </ol>
+    <div class="row"><a class="btn ghost" href="${KEY_URL}" target="_blank" rel="noopener">Conseguir la clave gratis</a></div>
+    <p class="small muted">La clave se guarda solo en este móvil o tablet; no viaja con el archivo cuando lo compartes. Con la clave gratuita, Google puede usar las fotos enviadas para mejorar sus productos.</p>
+    <label class="f" for="aKey">Clave de la API de Gemini<input type="password" id="aKey" value="${esc(c.key)}" autocomplete="off" placeholder="AIza…"></label>
+    <label class="f" for="aModelo">Modelo<select id="aModelo">${MODELOS.map(([id,n])=>`<option value="${id}" ${id===c.modelo?'selected':''}>${n}</option>`).join('')}${MODELOS.some(m=>m[0]===c.modelo)?'':`<option value="${esc(c.modelo)}" selected>${esc(c.modelo)}</option>`}</select></label>
+    <div class="row"><button type="button" class="btn primary" id="aSave">Guardar y probar</button><span id="aMsg" class="small"></span></div>
+  </div>
+  ${nuevo?'':`<div class="card">
+    <span class="eyebrow">Copia de seguridad</span>
+    <p class="small muted">El progreso se guarda en este dispositivo. Para pasarlo a otro móvil o tablet, descarga la copia y ábrela allí con «Cargar copia».</p>
+    <div class="row"><button type="button" class="btn ghost" id="bExp">Descargar copia</button>
+      <label class="btn ghost" for="bImp">Cargar copia<input type="file" id="bImp" accept=".json,application/json" style="position:absolute;width:1px;height:1px;opacity:0"></label></div>
+  </div>`}</div>`;
+  const ponFoto = async inp => {
+    const f=inp.files&&inp.files[0]; if(!f) return;
+    try{ FOTO_TMP = await fotoCuadrada(f); }catch(e){ toast('No he podido abrir esa foto.'); return; }
+    if (P && P.nombre){ P.foto=FOTO_TMP; FOTO_TMP=undefined; savePerfil(); renderHeader(); toast('Foto guardada'); }
+    const base = Object.assign({}, P||PERFIL0(), {nombre:$('#pNombre').value}); if(FOTO_TMP!==undefined) base.foto=FOTO_TMP;
+    $('#pAvatar').innerHTML = avatarHTML(base,'big'); $('#pQuitar').hidden=false;
+  };
+  $('#pFotoCam').onchange = e => ponFoto(e.target); $('#pFotoGal').onchange = e => ponFoto(e.target);
+  $('#pQuitar').onclick = () => { if (P && P.nombre){ P.foto=''; savePerfil(); renderHeader(); } else FOTO_TMP=''; $('#pAvatar').innerHTML=avatarHTML(Object.assign({},P||PERFIL0(),{foto:'',nombre:$('#pNombre').value}),'big'); $('#pQuitar').hidden=true; };
+  $('#pSave').onclick = () => {
+    const nombre = $('#pNombre').value.trim(); if (!nombre){ $('#pNombre').focus(); toast('Escribe tu nombre'); return; }
+    P = Object.assign(P||PERFIL0(), {nombre, curso:$('#pCurso').value});
+    if (FOTO_TMP!==undefined){ P.foto=FOTO_TMP; FOTO_TMP=undefined; }
+    savePerfil(); renderHeader(); show('inicio');
+  };
+  $('#pBack') && ($('#pBack').onclick = ()=>show('inicio'));
+  $('#aSave').onclick = async () => {
+    const cfg = {key:$('#aKey').value.trim(), modelo:$('#aModelo').value};
+    lsSet(LS_IA, cfg); const m=$('#aMsg');
+    if (!cfg.key){ m.textContent='Sin clave: las fotos no funcionarán.'; return; }
+    m.textContent='Probando…'; $('#aSave').disabled=true;
+    try{ const r = await gemini('Responde solo con este JSON: {"ok":true}', null, undefined, cfg); m.textContent = r && r.ok ? '✓ Conectado con Google.' : 'Responde, pero raro. Prueba otro modelo.'; }
+    catch(e){ m.textContent = ERR[e&&e.code] || ('No funciona: '+(e&&e.message||'error desconocido')); }
+    finally{ $('#aSave').disabled=false; }
+  };
+  const ex=$('#bExp'); if (ex) ex.onclick = () => {
+    const blob = new Blob([JSON.stringify({app:'numerin', version:1, perfil:P, sesiones:SES})], {type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`numerin-${(P.nombre||'copia').toLowerCase().replace(/\s+/g,'-')}-${hoy()}.json`;
+    document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000);
+  };
+  const im=$('#bImp'); if (im) im.onchange = async () => {
+    const f=im.files&&im.files[0]; if(!f) return;
+    try{ const o=JSON.parse(await f.text()); if(o.app!=='numerin'||!o.perfil) throw 0;
+      P=Object.assign(PERFIL0(), o.perfil); SES=o.sesiones||[]; guardar(); renderHeader(); toast('Copia cargada'); show('inicio'); }
+    catch(e){ toast('Ese archivo no es una copia de Numerín.'); }
+  };
+}
+
+/* ================= Inicio ================= */
+function renderInicio(){
+  const tot = Object.values(P.temas).reduce((s,e)=>s+e.a+e.f,0);
+  const siguiente = CADA - (P.estrellas % CADA);
+  const nPeg = Math.min(PEGATINAS.length, Math.floor(P.estrellas/CADA));
+  const hora = new Date().getHours();
+  const saludo = hora<14?'Buenos días':hora<21?'Buenas tardes':'Buenas noches';
+  $('#v-inicio').innerHTML = `
+    <div class="hello-row">${avatarHTML(P,'mid')}<div class="hello"><h1>${saludo}, ${esc(P.nombre)}</h1><p class="muted">¿Qué hacemos hoy? Sin prisa: aquí no hay reloj.</p></div></div>
+    <div class="actions">
+      <button type="button" class="action hero" data-go="foto"><span class="ico">${ICON.cam}</span><b>Tengo un ejercicio</b><span class="muted">Hazle una foto y te lo explico con dibujos.</span></button>
+      <button type="button" class="action" data-go="examen" data-modo="curso"><span class="ico">${ICON.test}</span><b>Examen de ${esc(cursoNombre(P.curso))}</b><span class="muted">8 preguntas de tu curso.</span></button>
+      <button type="button" class="action" data-go="examen" data-modo="repaso" ${tot?'':'disabled'}><span class="ico">${ICON.mix}</span><b>Repaso mezclado</b><span class="muted">${tot?`Mezcla lo que has practicado y ${P.errores.length?`${P.errores.length} ${P.errores.length===1?'pregunta que fallaste':'preguntas que fallaste'}`:'tus temas más flojos'}.`:'Se activa cuando hayas practicado algo.'}</span></button>
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between"><h3>Próxima pegatina</h3><span class="muted small num">${nPeg} de ${PEGATINAS.length}</span></div>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="${CADA}" aria-valuenow="${CADA-siguiente}"><i style="width:${(CADA-siguiente)/CADA*100}%"></i></div>
+      <p class="small muted">Te faltan <b class="num">${siguiente}</b> ${siguiente===1?'estrella':'estrellas'}. Ganas una por cada acierto.</p>
+    </div>
+    <div class="card">
+      <h3>Los colores de Numerín</h3>
+      <p class="small muted">Cada lugar del número tiene siempre el mismo color, en todos los dibujos.</p>
+      <div class="legend"><span class="k-um"><i></i>Millares</span><span class="k-c"><i></i>Centenas</span><span class="k-d"><i></i>Decenas</span><span class="k-u"><i></i>Unidades</span></div>
+      <div class="bignum">${digHTML(2358)}</div>
+    </div>`;
+  $('#v-inicio').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ if(b.dataset.modo){ EX=null; show('examen'); startExam(b.dataset.modo); } else show(b.dataset.go); });
+}
+
+/* ================= Foto del ejercicio ================= */
+let PH = {estado:'elegir', file:null, url:null, texto:'', data:null, paso:0, fallosPaso:0, primera:0, ctl:null, error:''};
+/* ---- IA de Google (Gemini) ---- */
+const KEY_URL = 'https://aistudio.google.com/apikey';
+const MODELOS = [['gemini-3.8-flash','Gemini 3.8 Flash (gratis, recomendado)'],['gemini-3.5-flash-lite','Gemini 3.5 Flash-Lite (gratis, más rápido y con más usos al día)']];
+function ia(){ return Object.assign({key:'', modelo:'gemini-3.8-flash'}, lsGet(LS_IA)||{}); }
+const hayIA = () => !!ia().key;
+function fotoBase64(file){
+  return new Promise((ok,ko)=>{
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{ const max=1600, k=Math.min(1, max/Math.max(img.naturalWidth,img.naturalHeight));
+      const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*k); c.height=Math.round(img.naturalHeight*k);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url);
+      ok(c.toDataURL('image/jpeg',.85).split(',')[1]); };
+    img.onerror=()=>{ URL.revokeObjectURL(url); ko({code:'image_rejected'}); };
+    img.src=url;
+  });
+}
+function leerJSON(t){
+  try{ return JSON.parse(t); }catch(e){}
+  const m = t.match(/```(?:json)?\s*([\s\S]*?)```/); if(m){ try{ return JSON.parse(m[1]); }catch(e){} }
+  const i=t.indexOf('{'), j=t.lastIndexOf('}'); if(i>=0&&j>i){ try{ return JSON.parse(t.slice(i,j+1)); }catch(e){} }
+  throw {code:'invalid_json'};
+}
+const RESPALDO = 'gemini-3.5-flash-lite';
+async function gemini(prompt, file, signal, cfg){
+  cfg = cfg || ia();
+  try{ return await geminiUna(prompt, file, signal, cfg); }
+  catch(e){
+    if (e && (e.code==='rate_limited'||e.code==='model') && cfg.modelo!==RESPALDO) return await geminiUna(prompt, file, signal, Object.assign({}, cfg, {modelo:RESPALDO}));
+    throw e;
+  }
+}
+async function geminiUna(prompt, file, signal, cfg){
+  if (!cfg.key) throw {code:'key'};
+  const parts=[{text:prompt}];
+  if (file) parts.push({inline_data:{mime_type:'image/jpeg', data: await fotoBase64(file)}});
+  let res;
+  try{
+    res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(cfg.modelo)}:generateContent`, {
+      method:'POST', signal, headers:{'Content-Type':'application/json','x-goog-api-key':cfg.key},
+      body: JSON.stringify({contents:[{role:'user',parts}], generationConfig:{responseMimeType:'application/json', temperature:0.3}})
+    });
+  }catch(e){ throw {code: e && e.name==='AbortError' ? 'cancelled' : 'red'}; }
+  let j=null; try{ j=await res.json(); }catch(e){}
+  if (!res.ok){
+    const msg = (j && j.error && j.error.message) || '';
+    const code = res.status===429 ? 'rate_limited' : res.status===404 ? 'model' : (res.status===400&&/key/i.test(msg))||res.status===401||res.status===403 ? 'key' : 'upstream';
+    throw {code, message:msg};
+  }
+  const cand = j && j.candidates && j.candidates[0];
+  const txt = ((cand && cand.content && cand.content.parts) || []).filter(p=>p.text && !p.thought).map(p=>p.text).join('');
+  if (!txt) throw {code: (j && j.promptFeedback && j.promptFeedback.blockReason) || (cand && cand.finishReason==='SAFETY') ? 'refused' : 'empty'};
+  return leerJSON(txt);
+}
+const ERR = {
+  key:'La clave de Google no funciona. Pide a un mayor que la revise en Ajustes.',
+  model:'Ese modelo de Google no está disponible. Cambia el modelo en Ajustes.',
+  red:'No hay conexión a internet. Conéctate a la wifi y vuelve a intentarlo.',
+  rate_limited:'Hoy se han gastado los usos gratis de Google, o vamos muy deprisa. Espera un rato (o mañana) y vuelve a intentarlo.',
+  image_rejected:'No he podido abrir esa foto. Prueba con otra.',
+  refused:'No he podido explicar esa foto. Prueba con una foto solo del ejercicio.',
+};
+function buildPrompt(){
+  const ids = Object.keys(TEMAS).join(', ');
+  return `Eres Numerín, un profe de matemáticas muy paciente. Ayudas a ${P.nombre}, que está en ${cursoNombre(P.curso)} y tiene discalculia (le cuesta entender los números y las operaciones).
+${PH.texto ? `Ejercicio escrito por ${P.nombre}: """${PH.texto.slice(0,1500)}"""` : 'La imagen adjunta es una foto de su cuaderno, ficha o libro.'}
+${PH.file && PH.texto ? 'También hay una foto adjunta del ejercicio.' : ''}
+Si hay varios ejercicios, elige el primero que no esté resuelto.
+
+Tu trabajo NO es darle la solución: es guiarla para que llegue sola, paso a paso, con dibujos.
+
+Reglas:
+- Entre 3 y 6 pasos. Cada paso es una sola idea.
+- "explica": como mucho 2 frases cortas, con palabras de una niña de 9 años, sin tecnicismos. No digas nunca el resultado final dentro de "explica".
+- Al hablar de cifras, usa siempre estos colores: unidades (azul), decenas (verde), centenas (naranja), millares (morado).
+- En las restas usa el método de España: "de 7 a 12 van 5 y me llevo 1".
+- Horas: di la hora como en España ("las 4 menos cuarto", "las 3 y 20"). Medidas: usa la escalera de unidades (cada escalón ×10).
+- Cada paso acaba con una pregunta que ella contesta tocando un botón: 3 opciones cortas (preferiblemente números), solo una correcta. El último paso pregunta el resultado final del ejercicio.
+- Comprueba cada cálculo dos veces: la opción correcta tiene que estar bien de verdad. Números decimales con coma en los textos.
+- "pista": una ayuda corta por si falla, sin decir la respuesta.
+- "visual": el dibujo que mejor ayude en ese paso, con uno de estos formatos exactos (números en JSON con punto decimal):
+  {"tipo":"bloques","numero":347}   enteros hasta 9999; dibuja millares, centenas, decenas y unidades
+  {"tipo":"posicional","numero":3482}   tabla de valor posicional
+  {"tipo":"operacion","a":347,"b":285,"op":"+"}   op es "+", "-" o "x"; pon "resultado" solo cuando ya se haya calculado en un paso anterior
+  {"tipo":"recta","desde":0,"hasta":20,"saltos":[{"de":7,"a":12}],"puntos":[7]}
+  {"tipo":"fraccion","fracciones":[{"num":3,"den":4}]}
+  {"tipo":"grupos","grupos":4,"porGrupo":6}   como mucho 12 y 12
+  {"tipo":"reloj","horas":4,"minutos":40}   reloj de agujas; añade "digital":true solo cuando ya se sepa la hora
+  {"tipo":"escalera","magnitud":"longitud","desde":"m","hasta":"cm"}   escalera de unidades; magnitud: longitud, peso o capacidad
+  {"tipo":"ninguno"}
+- "tema": uno de: ${ids}.
+- Si no se puede leer o no es un ejercicio de mates, responde {"legible":false,"motivo":"frase corta y amable para ella"}.
+
+Responde SOLO con este JSON:
+{"legible":true,"enunciado":"el ejercicio copiado tal cual","tema":"suma","idea":"una frase con el truco para recordarlo la próxima vez","pasos":[{"explica":"...","visual":{"tipo":"..."},"pregunta":"...","opciones":["...","...","..."],"correcta":0,"pista":"..."}]}`;
+}
+function sanea(d){
+  if (!d || typeof d!=='object') return null;
+  if (d.legible===false) return {legible:false, motivo: String(d.motivo||'No he podido leer bien el ejercicio.')};
+  const pasos = (Array.isArray(d.pasos)?d.pasos:[]).slice(0,8).map(p=>{
+    let op = (Array.isArray(p.opciones)?p.opciones:[]).slice(0,4).map(o=>String(o)).filter(Boolean);
+    let c = Number.isInteger(p.correcta) ? p.correcta : parseInt(p.correcta,10);
+    if (op.length<2 || !(c>=0 && c<op.length)){ op=['¡Entendido!']; c=0; }
+    return {explica:String(p.explica||''), visual:p.visual&&typeof p.visual==='object'?p.visual:null, pregunta:String(p.pregunta||''), opciones:op, correcta:c, pista:String(p.pista||'Vuelve a mirar el dibujo con calma.')};
+  }).filter(p=>p.explica||p.pregunta);
+  if (!pasos.length) return null;
+  return {legible:true, enunciado:String(d.enunciado||'').slice(0,600), tema: TEMAS[d.tema]?d.tema:'otro', idea:String(d.idea||''), pasos};
+}
+const MSGS = ['Numerín está leyendo tu ejercicio…','Buscando la mejor forma de dibujarlo…','Preparando los pasos…','Casi listo…'];
+async function explicar(){
+  if (!hayIA()) return;
+  PH.estado='cargando'; PH.error=''; renderFoto();
+  const ctl = new AbortController(); PH.ctl = ctl;
+  let mi=0; const tick=setInterval(()=>{ mi=Math.min(mi+1,MSGS.length-1); const m=$('#phMsg'); if(m) m.textContent=MSGS[mi]; }, 7000);
+  try{
+    const d = sanea(await gemini(buildPrompt(), PH.file, ctl.signal));
+    if (!d){ PH.estado='error'; PH.error='No me ha salido bien la explicación. Pulsa «Intentar otra vez».'; }
+    else if (!d.legible){ PH.estado='error'; PH.error=d.motivo; }
+    else { PH.data=d; PH.paso=0; PH.fallosPaso=0; PH.primera=0; PH.estado='pasos'; }
+  }catch(e){
+    if (e && e.code==='cancelled') PH.estado='elegir';
+    else { PH.estado='error'; PH.error = ERR[e&&e.code] || 'No me ha salido bien la explicación. Pulsa «Intentar otra vez».'; }
+  }finally{ clearInterval(tick); PH.ctl=null; if(VIEW==='foto') renderFoto(); }
+}
+function resetFoto(){ if(PH.url) URL.revokeObjectURL(PH.url); PH={estado:'elegir',file:null,url:null,texto:'',data:null,paso:0,fallosPaso:0,primera:0,ctl:null,error:''}; renderFoto(); }
+function renderFoto(){
+  const v = $('#v-foto');
+  if (PH.estado==='elegir'){
+    const ok = hayIA();
+    v.innerHTML = `<div class="card">
+      <h2>Tengo un ejercicio</h2>
+      <p class="muted">Haz una foto al ejercicio que no entiendes. Numerín no te da la solución: te acompaña para que llegues tú.</p>
+      ${!ok ? `<div class="notice">Falta conectar la IA gratuita de Google. Pide a un mayor que consiga la clave en <a href="${KEY_URL}" target="_blank" rel="noopener">aistudio.google.com/apikey</a> y la pegue en <b>Ajustes</b>. Mientras, puedes hacer exámenes y repasos.</div>
+        <div class="row"><button type="button" class="btn primary" id="phAj">Ir a Ajustes</button></div>` : `
+      <label class="drop btn" for="phFile">${ICON.cam}<b>${PH.file?'Cambiar la foto':'Hacer o elegir una foto'}</b><span class="small muted">Que se vea bien un solo ejercicio.</span><input type="file" id="phFile" accept="image/*" capture="environment"></label>
+      ${PH.url ? `<img class="preview" src="${PH.url}" alt="Foto del ejercicio">` : ''}
+      <label class="f" for="phTxt">Si quieres, escribe también el ejercicio o lo que no entiendes<textarea id="phTxt" placeholder="Por ejemplo: 347 + 285   o   ¿A qué hora termina la peli?">${esc(PH.texto)}</textarea></label>
+      <button type="button" class="btn primary big" id="phGo" ${(PH.file||PH.texto.trim())?'':'disabled'}>Explícamelo</button>`}
+    </div>`;
+    const aj=$('#phAj'); if (aj) aj.onclick=()=>show('perfil');
+    const f=$('#phFile'); if (f) f.onchange = () => { const file=f.files&&f.files[0]; if(!file) return; if(PH.url) URL.revokeObjectURL(PH.url); PH.file=file; PH.url=URL.createObjectURL(file); PH.texto=$('#phTxt').value; renderFoto(); };
+    const t=$('#phTxt'); if (t) t.oninput = () => { PH.texto=t.value; const g=$('#phGo'); if(g) g.disabled = !(PH.file||PH.texto.trim()); };
+    const g=$('#phGo'); if (g) g.onclick = explicar;
+    return;
+  }
+  if (PH.estado==='cargando'){
+    v.innerHTML = `<div class="card">
+      ${PH.url?`<img class="preview" src="${PH.url}" alt="Foto del ejercicio">`:''}
+      <div class="thinking"><div class="dots"><i></i><i></i><i></i><i></i></div><p id="phMsg">${MSGS[0]}</p></div>
+      <p class="small muted">Tarda unos segundos, como cuando un profe piensa antes de explicar.</p>
+      <div class="row"><button type="button" class="btn ghost" id="phStop">Parar</button></div></div>`;
+    $('#phStop').onclick = () => PH.ctl && PH.ctl.abort();
+    return;
+  }
+  if (PH.estado==='error'){
+    v.innerHTML = `<div class="card"><h2>Vaya</h2><p>${esc(PH.error)}</p>
+      <div class="row"><button type="button" class="btn primary" id="phRetry" ${hayIA()?'':'disabled'}>Intentar otra vez</button><button type="button" class="btn ghost" id="phNew">Otra foto</button></div></div>`;
+    $('#phRetry').onclick = explicar; $('#phNew').onclick = resetFoto; return;
+  }
+  const d = PH.data;
+  if (PH.estado==='fin'){
+    v.innerHTML = `<div class="card">
+      <span class="eyebrow">${esc(temaNombre(d.tema))}</span>
+      <h2>¡Lo has resuelto tú!</h2>
+      <p class="enun">${esc(d.enunciado)}</p>
+      ${d.idea?`<div class="feedback ok"><b>El truco para la próxima vez</b><p>${esc(d.idea)}</p></div>`:''}
+      <div id="phPrem">${PH.premios||''}</div>
+      <div class="row">
+        <button type="button" class="btn primary" id="phNew">Otro ejercicio</button>
+        ${GEN[d.tema]?`<button type="button" class="btn ghost" id="phPract">Practicar más de ${esc(temaNombre(d.tema).toLowerCase())}</button>`:''}
+      </div></div>`;
+    $('#phNew').onclick = resetFoto;
+    const pr=$('#phPract'); if(pr) pr.onclick = ()=>{ show('examen'); startExam('tema', d.tema); };
+    return;
+  }
+  const p = d.pasos[PH.paso];
+  const stepsBar = d.pasos.map((_,i)=>`<i class="${i<PH.paso?'done':i===PH.paso?'now':''}"></i>`).join('');
+  v.innerHTML = `<div class="card">
+    <div class="row" style="justify-content:space-between"><span class="chip">${esc(temaNombre(d.tema))}</span><span class="small muted">Paso ${PH.paso+1} de ${d.pasos.length}</span></div>
+    <div class="steps" aria-hidden="true">${stepsBar}</div>
+    ${PH.paso===0?`<p class="enun">${esc(d.enunciado)}</p>`:''}
+    <div class="qhead"><p class="qtext" style="font-weight:500">${esc(p.explica)}</p>${speakBtn(p.explica+'. '+p.pregunta)}</div>
+    ${vis(p.visual)}
+    <p class="qtext">${esc(p.pregunta)}</p>
+    <div class="opts" id="phOpts">${p.opciones.map((o,i)=>`<button type="button" class="opt ${optIsText(o)?'txt':''}" data-i="${i}">${optHTML(o)}</button>`).join('')}</div>
+    <div id="phFb"></div>
+  </div>`;
+  $('#phOpts').onclick = e => {
+    const b=e.target.closest('.opt'); if(!b||b.disabled) return;
+    const i=+b.dataset.i;
+    if (i===p.correcta){
+      b.classList.add('good'); $('#phOpts').querySelectorAll('.opt').forEach(x=>x.disabled=true);
+      if (PH.fallosPaso===0) PH.primera++;
+      const last = PH.paso===d.pasos.length-1;
+      $('#phFb').innerHTML = `<div class="feedback ok"><b>¡Muy bien!</b><button type="button" class="btn primary" id="phNext">${last?'Terminar':'Siguiente paso'}</button></div>`;
+      $('#phNext').onclick = () => { if(last) terminarFoto(); else { PH.paso++; PH.fallosPaso=0; renderFoto(); } };
+      $('#phNext').focus();
+    } else {
+      b.classList.add('bad'); b.disabled=true; PH.fallosPaso++;
+      $('#phFb').innerHTML = `<div class="feedback ko"><div class="qhead"><b style="flex:1">Casi. Una pista:</b>${speakBtn(p.pista)}</div><p>${esc(p.pista)}</p></div>`;
+    }
+  };
+}
+function terminarFoto(){
+  const d=PH.data, n=d.pasos.length, ok = PH.primera >= Math.ceil(n/2);
+  marcarDia(); anotarTema(d.tema, ok);
+  if (PH.repaso){ const r=darEstrellas(PH.primera); PH.premios=`<p><b>+${PH.primera} estrellas</b> por repasarlo.</p>`+premiosHTML(r); savePerfil(); renderHeader(); PH.estado='fin'; renderFoto(); return; }
+  P.stats.fotos++;
+  const r = darEstrellas(3 + PH.primera);
+  PH.premios = `<p><b>+${3+PH.primera} estrellas</b> por terminarlo.</p>` + premiosHTML(r);
+  addSesion({tipo:'foto', fecha:new Date().toISOString(), tema:d.tema, titulo:d.enunciado.slice(0,120), aciertos:PH.primera, total:n, datos:{enunciado:d.enunciado, idea:d.idea, tema:d.tema, pasos:d.pasos}});
+  savePerfil(); renderHeader(); PH.estado='fin'; renderFoto();
+}
+
+/* ================= Exámenes ================= */
+let EX = null;
+function pesoTema(t){ const e=P.temas[t]; if(!e) return 1.5; return 1 + 3*(e.f+1)/(e.a+e.f+2); }
+function elegirPonderado(temas, n){
+  const out=[], cuenta={};
+  while(out.length<n && temas.length){
+    const disp = temas.filter(t=>(cuenta[t]||0)<3); if(!disp.length) break;
+    const w = disp.map(pesoTema), tot=w.reduce((a,b)=>a+b,0); let r=Math.random()*tot, k=0;
+    while(r>w[k]){ r-=w[k]; k++; } const t=disp[Math.min(k,disp.length-1)];
+    out.push(t); cuenta[t]=(cuenta[t]||0)+1;
+  }
+  return out;
+}
+function startExam(modo, tema){
+  const L = nivel(P.curso), temas = temasCurso(P.curso);
+  let preguntas = [];
+  if (modo==='tema' && GEN[tema]) preguntas = Array.from({length:8},()=>GEN[tema](L));
+  else if (modo==='repaso'){
+    const errs = shuffle(P.errores).slice(0,3).map(q=>Object.assign({}, q, {repaso:true}));
+    const vistos = Object.keys(P.temas).filter(t=>GEN[t] && (P.temas[t].a+P.temas[t].f)>0);
+    const flojos = [...vistos].sort((a,b)=>pesoTema(b)-pesoTema(a));
+    const n = 8-errs.length, nVist = vistos.length ? Math.round(n*.7) : 0;
+    const ts = [...elegirPonderado(flojos.length?flojos:temas, nVist), ...elegirPonderado(temas, n-nVist)];
+    preguntas = shuffle([...errs, ...ts.map(t=>GEN[t](L))]);
+  } else { modo='curso'; preguntas = shuffle(elegirPonderado(temas, 8).map(t=>GEN[t](L))); }
+  EX = {modo, tema, preguntas, i:0, aciertos:0, respondida:false, fallos:[], estado:'preg'};
+  renderExamen();
+}
+function renderExamen(){
+  const v=$('#v-examen');
+  if (!EX){
+    const temas = temasCurso(P.curso);
+    const hayHist = Object.values(P.temas).some(e=>e.a+e.f>0);
+    v.innerHTML = `<div class="card"><h2>Exámenes</h2><p class="muted">Sin reloj. Si fallas, Numerín te enseña por qué con un dibujo.</p>
+      <div class="actions">
+        <button type="button" class="action hero" data-m="curso"><span class="ico">${ICON.test}</span><b>Examen de ${esc(cursoNombre(P.curso))}</b><span class="muted">8 preguntas. Salen más las de los temas que te cuestan.</span></button>
+        <button type="button" class="action" data-m="repaso" ${hayHist?'':'disabled'}><span class="ico">${ICON.mix}</span><b>Repaso mezclado</b><span class="muted">${hayHist?'Mezcla tu historial: preguntas que fallaste y tus temas más flojos.':'Se activa cuando hayas practicado algo.'}</span></button>
+      </div></div>
+      <div class="card"><h3>Practicar un tema</h3>
+        <label class="f" for="exTema">Elige el tema<select id="exTema">${temas.map(t=>`<option value="${t}">${esc(temaNombre(t))}</option>`).join('')}</select></label>
+        <div class="row"><button type="button" class="btn primary" id="exTemaGo">Practicar 8 preguntas</button></div></div>`;
+    v.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>startExam(b.dataset.m));
+    $('#exTemaGo').onclick=()=>startExam('tema', $('#exTema').value);
+    return;
+  }
+  if (EX.estado==='fin'){
+    const n=EX.preguntas.length, pct=EX.aciertos/n;
+    const titulo = pct===1?'¡Examen perfecto!':pct>=.75?'¡Muy bien hecho!':pct>=.5?'¡Vas por buen camino!':'Cada error te enseña algo';
+    const flojos=[...new Set(EX.fallos.map(q=>q.tema))];
+    v.innerHTML = `<div class="card">
+      <span class="eyebrow">${EX.modo==='repaso'?'Repaso mezclado':EX.modo==='tema'?temaNombre(EX.tema):'Examen de '+cursoNombre(P.curso)}</span>
+      <h2>${titulo}</h2>
+      <p class="bignum pop">${EX.aciertos} <span class="muted" style="font-size:1.2rem">de ${n}</span></p>
+      <div>${EX.premiosHTML||''}</div>
+      ${flojos.length?`<p>Para la próxima vez repasamos: <b>${flojos.map(t=>esc(temaNombre(t).toLowerCase())).join(', ')}</b>. Las preguntas falladas se guardan para el Repaso mezclado.</p>`:''}
+      <div class="row"><button type="button" class="btn primary" id="exOtra">Otro examen</button><button type="button" class="btn ghost" id="exIni">Volver al inicio</button></div></div>`;
+    $('#exOtra').onclick=()=>{ EX=null; renderExamen(); }; $('#exIni').onclick=()=>{ EX=null; show('inicio'); };
+    return;
+  }
+  const q = EX.preguntas[EX.i], n=EX.preguntas.length;
+  v.innerHTML = `<div class="card">
+    <div class="row" style="justify-content:space-between">
+      <span class="row" style="gap:6px"><span class="chip">${esc(temaNombre(q.tema))}</span>${q.repaso?'<span class="chip rep">La fallaste antes</span>':''}</span>
+      <span class="small muted num">Pregunta ${EX.i+1} de ${n}</span></div>
+    <div class="steps" aria-hidden="true">${EX.preguntas.map((_,i)=>`<i class="${i<EX.i?'done':i===EX.i?'now':''}"></i>`).join('')}</div>
+    <div class="qhead"><p class="qtext">${esc(q.texto)}</p>${canSpeak||consejo(q)?`<button type="button" class="speak" id="exSpeak" aria-label="Leer la pregunta y un consejo">${ICON.speak}</button>`:''}</div>
+    <div class="tipbox" id="exTip" hidden><b>Cómo hacerlo</b><p>${esc(consejo(q)||'Lee la pregunta despacio y mira el dibujo con calma.')}</p></div>
+    ${vis(q.visual)}
+    <div class="opts" id="exOpts">${q.opciones.map((o,i)=>`<button type="button" class="opt ${optIsText(o)?'txt':''}" data-i="${i}">${optHTML(o)}</button>`).join('')}</div>
+    <div id="exFb"></div></div>`;
+  const sp=$('#exSpeak'); if (sp) sp.onclick = () => { $('#exTip').hidden=false; hablar(q.texto+'. '+(consejo(q)||'Lee la pregunta despacio y mira el dibujo con calma.')); };
+  $('#exOpts').onclick = e => {
+    const b=e.target.closest('.opt'); if(!b||EX.respondida) return;
+    EX.respondida=true; const i=+b.dataset.i, ok = i===q.correcta;
+    $('#exOpts').querySelectorAll('.opt').forEach((x,j)=>{ x.disabled=true; if(j===q.correcta) x.classList.add('good'); });
+    if (!ok) b.classList.add('bad');
+    anotarTema(q.tema, ok);
+    const clave = q.texto;
+    if (ok){ EX.aciertos++; if (q.repaso){ P.errores = P.errores.filter(x=>x.texto!==clave); P.stats.vencidos++; } }
+    else { EX.fallos.push(q); const base={...q}; delete base.repaso; P.errores = P.errores.filter(x=>x.texto!==clave); P.errores.push(base); if(P.errores.length>25) P.errores.shift(); }
+    const last = EX.i===n-1;
+    $('#exFb').innerHTML = `<div class="feedback ${ok?'ok':'ko'}">
+      <div class="qhead"><b style="flex:1">${ok?pick(['¡Bien hecho!','¡Correcto!','¡Genial!','¡Eso es!']):'Casi. Mira cómo se hace:'}</b>${q.explicacion?speakBtn(q.explicacion):''}</div>
+      ${q.explicacion?`<p>${esc(q.explicacion)}</p>`:''}
+      ${!ok||!q.visual?vis(q.visualExp):''}
+      <div class="row"><button type="button" class="btn primary" id="exNext">${last?'Ver mi resultado':'Siguiente'}</button></div></div>`;
+    $('#exNext').onclick = () => { if(last) terminarExamen(); else { EX.i++; EX.respondida=false; renderExamen(); } };
+    $('#exNext').focus({preventScroll:true});
+    $('#exFb').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth', block:'nearest'});
+  };
+}
+function terminarExamen(){
+  const n=EX.preguntas.length, perfect = EX.aciertos===n;
+  marcarDia(); P.stats.examenes++; if(perfect) P.stats.perfectos++;
+  const ganadas = EX.aciertos + 2 + (perfect?5:0);
+  const r = darEstrellas(ganadas);
+  EX.premiosHTML = `<p><b>+${ganadas} estrellas</b>${perfect?' (con premio por examen perfecto)':''}.</p>` + premiosHTML(r);
+  addSesion({tipo:'examen', modo:EX.modo, fecha:new Date().toISOString(), tema:EX.modo==='tema'?EX.tema:'', titulo: EX.modo==='repaso'?'Repaso mezclado':EX.modo==='tema'?'Práctica: '+temaNombre(EX.tema):'Examen de '+cursoNombre(P.curso), aciertos:EX.aciertos, total:n, temas:[...new Set(EX.preguntas.map(q=>q.tema))], fallos:EX.fallos.map(q=>q.texto)});
+  savePerfil(); renderHeader(); EX.estado='fin'; renderExamen();
+}
+
+/* ================= Premios ================= */
+function renderPremios(){
+  const nPeg=Math.min(PEGATINAS.length, Math.floor(P.estrellas/CADA));
+  $('#v-premios').innerHTML = `
+    <div class="tiles">
+      <div class="tile"><span class="eyebrow">Estrellas</span><span class="v">${P.estrellas}</span></div>
+      <div class="tile"><span class="eyebrow">Pegatinas</span><span class="v">${nPeg}<span class="muted" style="font-size:1rem"> / ${PEGATINAS.length}</span></span></div>
+      <div class="tile"><span class="eyebrow">Mejor racha</span><span class="v">${P.rachaMax||0}<span class="muted" style="font-size:1rem"> días</span></span></div>
+    </div>
+    <div class="card"><h3>Mi colección de pegatinas</h3><p class="small muted">Una pegatina nueva cada ${CADA} estrellas.</p>
+      <div class="stickers">${PEGATINAS.map((s,i)=>i<nPeg?`<div class="sticker" title="Pegatina ${i+1}">${s}</div>`:`<div class="sticker lock" aria-label="Bloqueada, ${(i+1)*CADA} estrellas">${(i+1)*CADA}</div>`).join('')}</div></div>
+    <div class="card"><h3>Medallas</h3><div class="badges">${INSIGNIAS.map(b=>{const on=P.insignias.includes(b.id);return `<div class="badge ${on?'':'lock'}"><span class="medal">${ICON.medal}</span><div><b>${esc(b.n)}</b><p class="small muted">${esc(b.d)}</p></div></div>`}).join('')}</div></div>`;
+}
+
+/* ================= Progreso ================= */
+function renderProgreso(){
+  const temas = Object.entries(P.temas).filter(([,e])=>e.a+e.f>0).sort((x,y)=>(y[1].a+y[1].f)-(x[1].a+x[1].f));
+  const tA = temas.reduce((s,[,e])=>s+e.a,0), tF = temas.reduce((s,[,e])=>s+e.f,0);
+  const pct = tA+tF ? Math.round(tA/(tA+tF)*100) : 0;
+  const flojos = temas.filter(([t,e])=>GEN[t] && e.a+e.f>=3 && e.a/(e.a+e.f)<.7).map(([t])=>t);
+  const color = r => r>=.8?'var(--ok)':r>=.55?'var(--star)':'var(--ko)';
+  const fdate = iso => { try{ return new Date(iso).toLocaleDateString('es-ES',{day:'numeric',month:'short'}); }catch(e){ return ''; } };
+  $('#v-progreso').innerHTML = `
+    <div class="tiles">
+      <div class="tile"><span class="eyebrow">Días practicando</span><span class="v">${P.dias.length}</span></div>
+      <div class="tile"><span class="eyebrow">Preguntas hechas</span><span class="v">${tA+tF}</span></div>
+      <div class="tile"><span class="eyebrow">Aciertos</span><span class="v">${pct}<span class="muted" style="font-size:1rem"> %</span></span></div>
+      <div class="tile"><span class="eyebrow">Para repasar</span><span class="v">${P.errores.length}</span></div>
+    </div>
+    <div class="card"><h3>Cómo va cada tema</h3>
+      ${temas.length ? `<div>${temas.map(([t,e])=>{ const r=e.a/(e.a+e.f); return `<div class="trow"><div style="min-width:0"><b>${esc(temaNombre(t))}</b><p class="small muted num">${e.a} bien · ${e.f} mal</p></div><div class="mbar" aria-label="${Math.round(r*100)} % de aciertos"><i style="width:${Math.round(r*100)}%;background:${color(r)}"></i></div>${GEN[t]?`<button type="button" class="linkbtn" data-pt="${t}">Practicar</button>`:'<span></span>'}</div>`; }).join('')}</div>`
+        : `<p class="muted">Aquí verás cada tema cuando hagas tu primer examen o expliques tu primer ejercicio.</p>`}
+    </div>
+    ${temas.length?`<div class="card"><h3>Resumen para mamá y papá</h3>
+      <p>${esc(P.nombre)} ha practicado ${P.dias.length} ${P.dias.length===1?'día':'días'} y ha contestado ${tA+tF} preguntas, con un ${pct} % de aciertos.
+      ${flojos.length?` Los temas que más le cuestan ahora son: <b>${flojos.map(t=>esc(temaNombre(t).toLowerCase())).join(', ')}</b>.`:' Ahora mismo ningún tema está por debajo del 70 %.'}
+      ${P.errores.length?` Tiene ${P.errores.length} ${P.errores.length===1?'pregunta fallada guardada':'preguntas falladas guardadas'} que saldrán en el Repaso mezclado hasta que las acierte.`:''}</p></div>`:''}
+    <div class="card"><h3>Historial</h3>
+      ${SES.length ? `<div class="hist">${SES.slice(0,40).map((s,i)=>{ const r=s.total?s.aciertos/s.total:0; return `<div class="hitem"><span class="chip">${s.tipo==='foto'?'Foto':'Examen'}</span><div class="t"><p><b>${esc(s.titulo||'')}</b></p><p class="small muted">${fdate(s.fecha)}${s.tema?' · '+esc(temaNombre(s.tema)):''}</p></div><span class="score ${r>=.8?'hi':r>=.5?'mid':'lo'}">${s.aciertos}/${s.total}</span>${s.tipo==='foto'&&s.datos?`<button type="button" class="linkbtn" data-rev="${i}">Ver otra vez</button>`:''}</div>`; }).join('')}</div>`
+        : `<p class="muted">Todavía no hay nada. Empieza con una foto o un examen.</p>`}
+    </div>`;
+  $('#v-progreso').querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{ show('examen'); startExam('tema', b.dataset.pt); });
+  $('#v-progreso').querySelectorAll('[data-rev]').forEach(b=>b.onclick=()=>{
+    const s=SES[+b.dataset.rev]; const d=sanea(Object.assign({legible:true}, s.datos)); if(!d) return;
+    PH={estado:'pasos',file:null,url:null,texto:'',data:d,paso:0,fallosPaso:0,primera:0,ctl:null,error:'',repaso:true}; show('foto');
+  });
+}
+
+/* ================= Arranque ================= */
+let installEvt=null;
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); installEvt=e; $('#installBtn').hidden=false; });
+$('#installBtn').addEventListener('click', async ()=>{ if(!installEvt) return; installEvt.prompt(); try{ await installEvt.userChoice; }catch(e){} installEvt=null; $('#installBtn').hidden=true; });
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+(function(){
+  loadData();
+  renderHeader();
+  show(P && P.nombre ? 'inicio' : 'perfil');
+})();
+</script>
+</body>
+</html>
